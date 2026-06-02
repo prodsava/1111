@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Red Black Predictor</title>
+<style>
+:root{
+  --bg:#06070b;
+  --panel:#10141e;
+  --panel2:#151a26;
+  --line:#293143;
+  --muted:#8f98ad;
+  --text:#f7f8ff;
+  --gold:#f5bd43;
+  --red:#ef263d;
+  --green:#25d366;
+}
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% -12%,rgba(245,189,67,.24),transparent 34%),
+    radial-gradient(circle at 15% 5%,rgba(239,38,61,.13),transparent 28%),
+    linear-gradient(180deg,#07080d,#05060a 70%);
+  color:var(--text);
+  display:flex;
+  justify-content:center;
+  padding:14px;
+}
+.app{
+  width:100%;
+  max-width:430px;
+  min-height:calc(100vh - 28px);
+  background:rgba(11,14,21,.96);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:30px;
+  box-shadow:0 24px 70px rgba(0,0,0,.72);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.header{
+  padding:22px 18px 14px;
+  text-align:center;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),transparent);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+h1{margin:0;font-size:26px;font-weight:950;letter-spacing:.2px}
+h1 span{color:var(--gold)}
+.sub{color:var(--muted);font-size:13px;margin-top:7px;line-height:1.35}
+.main{padding:16px;display:flex;flex-direction:column;gap:14px;flex:1}
+.panel{
+  background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel);
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:15px;
+  box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.title{font-size:15px;font-weight:950}
+.hint{color:var(--muted);font-size:12px;font-weight:800}
+.mode{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+button{
+  border:0;
+  border-radius:18px;
+  padding:15px;
+  color:white;
+  font-size:16px;
+  font-weight:950;
+  cursor:pointer;
+  transition:transform .12s ease,opacity .12s ease,box-shadow .12s ease,background .12s ease;
+  user-select:none;
+}
+button:active{transform:scale(.972);opacity:.86}
+.mode button{
+  background:#171d2a;
+  border:1px solid #313a50;
+  color:#aeb6c9;
+}
+.mode button.active{
+  background:linear-gradient(135deg,#ffd55a,#eaa21a);
+  color:#111;
+  border-color:#f5bd43;
+  box-shadow:0 10px 22px rgba(245,189,67,.16);
+}
+.preview{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:9px;
+}
+.slot{
+  height:58px;
+  border-radius:18px;
+  background:#0a0d14;
+  border:1px dashed #343d53;
+  color:#4f596f;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  font-size:18px;
+  position:relative;
+  overflow:hidden;
+}
+.slot:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 45%);
+  pointer-events:none;
+}
+.slot.r{
+  background:linear-gradient(135deg,#b90b1e,#ff3048);
+  border-color:#ff6373;
+  color:white;
+}
+.slot.b{
+  background:linear-gradient(135deg,#000,#343a47);
+  border-color:#626b7e;
+  color:white;
+}
+.inputs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
+  margin-top:12px;
+}
+.redbtn{background:linear-gradient(135deg,#bc0b1f,#ff3048);box-shadow:0 10px 22px rgba(239,38,61,.15)}
+.blackbtn{background:linear-gradient(135deg,#000,#3a4150);border:1px solid #555f72}
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
+}
+.undo{
+  background:#202635;
+  border:1px solid #394257;
+  color:#d8dded;
+}
+.clear{
+  background:#31151b;
+  border:1px solid #56303a;
+  color:#ffb7c0;
+}
+.generate{
+  width:100%;
+  padding:18px;
+  border-radius:22px;
+  background:linear-gradient(135deg,#ffd85d,#eaa01a);
+  color:#111;
+  font-size:21px;
+  box-shadow:0 14px 30px rgba(245,189,67,.18);
+}
+.result{
+  margin-top:auto;
+  background:
+    radial-gradient(circle at top,rgba(245,189,67,.18),transparent 55%),
+    linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.01)),
+    #0f131d;
+  border:1px solid #31384c;
+  border-radius:28px;
+  padding:18px;
+  text-align:center;
+  min-height:244px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  transform:translateY(0);
+}
+.result.hidden{
+  display:none;
+}
+.resultLabel{
+  color:var(--muted);
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:950;
+  margin-bottom:11px;
+}
+.card{
+  width:118px;
+  height:156px;
+  border-radius:20px;
+  margin:0 auto 13px;
+  background:#f4f5f8;
+  color:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:68px;
+  font-weight:950;
+  border:2px solid rgba(255,255,255,.9);
+  box-shadow:0 20px 38px rgba(0,0,0,.48);
+  animation:pop .22s ease-out;
+}
+.card.red{color:var(--red)}
+.card.black{color:#050505}
+@keyframes pop{from{transform:translateY(10px) scale(.94);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.signal{font-size:39px;font-weight:950;margin-bottom:7px;animation:fadeUp .22s ease-out}
+.signal.red{color:#ff354b}
+.signal.black{color:#f4f4f4}
+.conf{
+  display:inline-block;
+  margin:0 auto;
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(245,189,67,.13);
+  border:1px solid rgba(245,189,67,.32);
+  color:#ffe2a2;
+  font-size:14px;
+  font-weight:950;
+}
+.reason{
+  color:#9aa3b8;
+  font-size:13px;
+  line-height:1.35;
+  margin-top:11px;
+  min-height:18px;
+}
+.feedback{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px;
+  margin-top:13px;
+}
+.win{background:linear-gradient(135deg,#12883b,#27d767);box-shadow:0 10px 22px rgba(37,211,102,.12)}
+.lose{background:linear-gradient(135deg,#8a1118,#ff3f4f);box-shadow:0 10px 22px rgba(255,63,79,.12)}
+@keyframes fadeUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.footer{
+  text-align:center;
+  color:#737d92;
+  font-size:11.5px;
+  line-height:1.35;
+  padding:0 8px 2px;
+}
+.pulse{
+  animation:pulse .18s ease-out;
+}
+@keyframes pulse{from{transform:scale(.98)}to{transform:scale(1)}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="header">
+    <h1>Red / Black <span>Predictor</span></h1>
+    <div class="sub">Prvo unesi zadnje karte, pa generiši signal.</div>
+  </header>
+
+  <div class="main">
+    <section class="panel">
+      <div class="topline">
+        <div class="title">1. Izaberi pregled</div>
+        <div id="modeText" class="hint">LAST 5</div>
+      </div>
+      <div class="mode">
+        <button id="m4" onclick="setMode(4)">LAST 4</button>
+        <button id="m5" class="active" onclick="setMode(5)">LAST 5</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="topline">
+        <div class="title">2. Unesi karte</div>
+        <div id="countText" class="hint">0/5</div>
+      </div>
+      <div id="preview" class="preview"></div>
+      <div class="inputs">
+        <button class="redbtn" onclick="addCard('R')">RED</button>
+        <button class="blackbtn" onclick="addCard('B')">BLACK</button>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="undo" onclick="undo()">UNDO</button>
+      <button class="clear" onclick="resetAll()">RESET</button>
+    </div>
+
+    <button class="generate" onclick="generate()">GENERATE</button>
+
+    <section id="result" class="result hidden">
+      <div class="resultLabel">Predikcija</div>
+      <div id="card" class="card red">♥</div>
+      <div id="signal" class="signal red">RED</div>
+      <div id="conf" class="conf">70%</div>
+      <div id="reason" class="reason">Signal spreman.</div>
+
+      <div class="feedback">
+        <button class="win" onclick="mark(true)">WIN</button>
+        <button class="lose" onclick="mark(false)">LOSE</button>
+      </div>
+    </section>
+
+    <div class="footer">WIN dodaje prediktanu kartu. LOSE dodaje suprotnu. Sve ostaje sačuvano na ovom uređaju.</div>
+  </div>
+</main>
+
+<script>
+const KEY="rb_predictor_smooth_v5";
+let db=JSON.parse(localStorage.getItem(KEY)||"null")||{cards:[],mode:5,pending:null,patternDB:{}};
+const $=id=>document.getElementById(id);
+
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function opp(c){return c==="RED"?"BLACK":"RED"}
+function short(c){return c==="RED"?"R":"B"}
+function key(a){return a.join("")}
+
+function setMode(n){
+  db.mode=n;
+  db.pending=null;
+  save();
+  hideResult();
+  render();
+}
+
+function addCard(c){
+  db.cards.push(c);
+  if(db.cards.length>500) db.cards.shift();
+  db.pending=null;
+  save();
+  hideResult();
+  render(true);
+}
+
+function undo(){
+  db.cards.pop();
+  db.pending=null;
+  save();
+  hideResult();
+  render();
+}
+
+function resetAll(){
+  if(!confirm("Resetovati sve karte i učenje?")) return;
+  db={cards:[],mode:5,pending:null,patternDB:{}};
+  save();
+  hideResult();
+  render();
+}
+
+function streak(a){
+  if(!a.length) return {side:null,n:0};
+  let last=a[a.length-1], n=1;
+  for(let i=a.length-2;i>=0;i--){
+    if(a[i]===last) n++;
+    else break;
+  }
+  return {side:last,n};
+}
+
+function learnBoost(pattern,pick){
+  let r=db.patternDB[pattern]?.[pick];
+  if(!r || r.total<2) return 0;
+  let wr=r.win/r.total;
+  if(wr>=.70) return 16;
+  if(wr>=.60) return 9;
+  if(wr<=.35) return -16;
+  if(wr<=.45) return -8;
+  return 0;
+}
+
+function predict(){
+  let n=db.mode;
+  if(db.cards.length<n){
+    return {wait:true, message:"Treba još " + (n-db.cards.length) + " karti"};
+  }
+
+  let recent=db.cards.slice(-n);
+  let pattern=key(recent);
+  let r=recent.filter(x=>x==="R").length;
+  let b=recent.filter(x=>x==="B").length;
+  let s=streak(recent);
+  let red=50, black=50;
+  let why=[];
+
+  if(s.n>=3){
+    let boost=18+Math.min(10,(s.n-3)*4);
+    if(s.side==="R"){ black+=boost; why.push("RED streak"); }
+    else { red+=boost; why.push("BLACK streak"); }
+  }
+
+  if(r-b>=2){ black+=13; why.push("RED balance"); }
+  if(b-r>=2){ red+=13; why.push("BLACK balance"); }
+
+  let alt=true;
+  for(let i=1;i<recent.length;i++){
+    if(recent[i]===recent[i-1]){ alt=false; break; }
+  }
+  if(alt){
+    let next=recent[recent.length-1]==="R" ? "BLACK" : "RED";
+    if(next==="RED") red+=14; else black+=14;
+    why.push("alternacija");
+  }
+
+  let last4=recent.slice(-4).join("");
+  let rules={
+    RRBB:["RED",9],
+    BBRR:["BLACK",9],
+    RBRR:["BLACK",8],
+    BRBB:["RED",8],
+    RRBR:["BLACK",7],
+    BBRB:["RED",7]
+  };
+  if(rules[last4]){
+    let ru=rules[last4];
+    if(ru[0]==="RED") red+=ru[1]; else black+=ru[1];
+    why.push(last4);
+  }
+
+  if(Math.abs(red-black)<7){
+    if(db.cards[db.cards.length-1]==="R"){ black+=5; why.push("last RED"); }
+    else { red+=5; why.push("last BLACK"); }
+  }
+
+  let pick=red>=black ? "RED" : "BLACK";
+  if(pick==="RED") red+=learnBoost(pattern,"RED");
+  else black+=learnBoost(pattern,"BLACK");
+
+  pick=red>=black ? "RED" : "BLACK";
+  let diff=Math.abs(red-black);
+  let conf=Math.max(52,Math.min(82,50+Math.round(diff*.78)));
+
+  return {
+    wait:false,
+    pick,
+    pattern,
+    conf: conf + "%",
+    reason: why.length ? "Signal baziran na: " + why.slice(0,2).join(" + ") : "Predikcija spremna."
+  };
+}
+
+function generate(){
+  let p=predict();
+  if(p.wait){
+    $("result").classList.remove("hidden");
+    $("card").textContent="?";
+    $("card").className="card red";
+    $("signal").textContent="DODAJ";
+    $("signal").className="signal red";
+    $("conf").textContent=p.message;
+    $("reason").textContent="Unesi dovoljno karata za izabrani pregled.";
+    db.pending=null;
+    save();
+    render();
+    return;
+  }
+
+  db.pending={pick:p.pick,pattern:p.pattern};
+  save();
+
+  $("result").classList.remove("hidden");
+  $("result").classList.remove("pulse");
+  void $("result").offsetWidth;
+  $("result").classList.add("pulse");
+
+  $("card").textContent=p.pick==="RED" ? "♥" : "♠";
+  $("card").className="card " + (p.pick==="RED" ? "red" : "black");
+  $("signal").textContent=p.pick;
+  $("signal").className="signal " + (p.pick==="RED" ? "red" : "black");
+  $("conf").textContent=p.conf;
+  $("reason").textContent=p.reason;
+
+  setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}),60);
+  render();
+}
+
+function mark(win){
+  if(!db.pending) return;
+
+  let predicted=db.pending.pick;
+  let actual=win ? predicted : opp(predicted);
+  db.cards.push(short(actual));
+  if(db.cards.length>500) db.cards.shift();
+
+  let pat=db.pending.pattern;
+  if(!db.patternDB[pat]){
+    db.patternDB[pat]={RED:{win:0,total:0},BLACK:{win:0,total:0}};
+  }
+  db.patternDB[pat][predicted].total++;
+  if(win) db.patternDB[pat][predicted].win++;
+
+  db.pending=null;
+  save();
+  hideResult();
+  render(true);
+}
+
+function hideResult(){
+  $("result").classList.add("hidden");
+}
+
+function render(pop){
+  $("m4").classList.toggle("active",db.mode===4);
+  $("m5").classList.toggle("active",db.mode===5);
+  $("modeText").textContent="LAST " + db.mode;
+
+  let recent=db.cards.slice(-db.mode);
+  $("countText").textContent=Math.min(recent.length,db.mode)+"/"+db.mode;
+
+  let preview=$("preview");
+  preview.innerHTML="";
+  for(let i=0;i<5;i++){
+    let slot=document.createElement("div");
+    let val=i<5-db.mode ? "" : recent[i-(5-db.mode)];
+    slot.className="slot";
+    if(val==="R"){slot.className+=" r";slot.textContent="R";}
+    else if(val==="B"){slot.className+=" b";slot.textContent="B";}
+    else slot.textContent="–";
+    preview.appendChild(slot);
+  }
+
+  if(pop){
+    preview.classList.remove("pulse");
+    void preview.offsetWidth;
+    preview.classList.add("pulse");
+  }
+}
+
+render();
+</script>
+</body>
+</html>
