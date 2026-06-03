@@ -135,9 +135,35 @@ button:active{transform:scale(.972);opacity:.86}
 .blackbtn{background:linear-gradient(135deg,#000,#3a4150);border:1px solid #555f72}
 .actions{
   display:grid;
+  grid-template-columns:1fr;
+  gap:11px;
+}
+.backupActions{
+  display:grid;
   grid-template-columns:1fr 1fr;
   gap:11px;
 }
+.sessionActions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:11px;
+}
+.newsession{
+  background:linear-gradient(135deg,#24314d,#3b4f7a);
+  border:1px solid #53699a;
+  color:#e7ecff;
+}
+.backup{
+  background:#182b20;
+  border:1px solid #2f6b45;
+  color:#bfffd2;
+}
+.import{
+  background:#1d2234;
+  border:1px solid #3b4868;
+  color:#d9e2ff;
+}
+input[type=file]{display:none}
 .undo{
   background:#202635;
   border:1px solid #394257;
@@ -250,24 +276,13 @@ button:active{transform:scale(.972);opacity:.86}
 <main class="app">
   <header class="header">
     <h1>Red / Black <span>Predictor</span></h1>
-    <div class="sub">Prvo unesi zadnje karte, pa generiši signal.</div>
+    <div class="sub">Prvo unesi zadnje karte, pa generiši signal. NEW SESSION čuva stari niz.</div>
   </header>
 
   <div class="main">
     <section class="panel">
       <div class="topline">
-        <div class="title">1. Izaberi pregled</div>
-        <div id="modeText" class="hint">LAST 5</div>
-      </div>
-      <div class="mode">
-        <button id="m4" onclick="setMode(4)">LAST 4</button>
-        <button id="m5" class="active" onclick="setMode(5)">LAST 5</button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="topline">
-        <div class="title">2. Unesi karte</div>
+        <div class="title">1. Unesi karte</div>
         <div id="countText" class="hint">0/5</div>
       </div>
       <div id="preview" class="preview"></div>
@@ -278,8 +293,17 @@ button:active{transform:scale(.972);opacity:.86}
     </section>
 
     <div class="actions">
-      <button class="undo" onclick="undo()">UNDO</button>
-      <button class="clear" onclick="resetAll()">RESET</button>
+      <button class="undo" onclick="undo()">UNDO LAST CARD</button>
+    </div>
+
+    <div class="sessionActions">
+      <button class="newsession" onclick="newSession()">NEW SESSION</button>
+    </div>
+
+    <div class="backupActions">
+      <button class="backup" onclick="downloadBackup()">BACKUP</button>
+      <button class="import" onclick="openImport()">IMPORT</button>
+      <input id="importFile" type="file" accept="application/json,.json" onchange="importBackup(event)">
     </div>
 
     <button class="generate" onclick="generate()">GENERATE</button>
@@ -297,13 +321,44 @@ button:active{transform:scale(.972);opacity:.86}
       </div>
     </section>
 
-    <div class="footer">WIN dodaje prediktanu kartu. LOSE dodaje suprotnu. Sve ostaje sačuvano na ovom uređaju.</div>
+    <div class="footer">NEW SESSION arhivira trenutni niz. BACKUP čuva aktivnu i stare sesije.</div>
   </div>
 </main>
 
 <script>
-const KEY="rb_predictor_smooth_v5";
-let db=JSON.parse(localStorage.getItem(KEY)||"null")||{cards:[],mode:5,pending:null,patternDB:{}};
+const KEY="rb_predictor_last5_precision_v7";
+const OLD_KEY="rb_predictor_smooth_v6_backup";
+let db=loadDB();
+
+function normalizeDB(data){
+  return {
+    cards:Array.isArray(data.cards) ? data.cards : [],
+    mode:5,
+    pending:null,
+    patternDB:data.patternDB || {},
+    sessions:Array.isArray(data.sessions) ? data.sessions : [],
+    recentSignals:Array.isArray(data.recentSignals) ? data.recentSignals : []
+  };
+}
+
+function loadDB(){
+  let current=localStorage.getItem(KEY);
+  if(current) return normalizeDB(JSON.parse(current));
+
+  let old=localStorage.getItem(OLD_KEY);
+  if(old){
+    try{
+      let parsed=JSON.parse(old);
+      if(parsed && Array.isArray(parsed.cards)){
+        let migrated=normalizeDB(parsed);
+        localStorage.setItem(KEY,JSON.stringify(migrated));
+        return migrated;
+      }
+    }catch(e){}
+  }
+
+  return {cards:[],mode:5,pending:null,patternDB:{},sessions:[],recentSignals:[]};
+}
 const $=id=>document.getElementById(id);
 
 function save(){localStorage.setItem(KEY,JSON.stringify(db))}
@@ -311,8 +366,101 @@ function opp(c){return c==="RED"?"BLACK":"RED"}
 function short(c){return c==="RED"?"R":"B"}
 function key(a){return a.join("")}
 
+function downloadBackup(){
+  const backup={
+    app:"red-black-predictor",
+    version:6,
+    exportedAt:new Date().toISOString(),
+    data:db
+  };
+
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const date=new Date().toISOString().slice(0,10);
+
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="red-black-predictor-backup-"+date+".json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+function openImport(){
+  $("importFile").click();
+}
+
+function newSession(){
+  if(db.cards.length===0){
+    db.pending=null;
+    save();
+    hideResult();
+    render();
+    alert("Nema karata za arhiviranje. Nova sesija je već prazna.");
+    return;
+  }
+
+  const archived={
+    id:"session-"+Date.now(),
+    createdAt:new Date().toISOString(),
+    cards:[...db.cards],
+    mode:5,
+    patternDB:JSON.parse(JSON.stringify(db.patternDB || {})),
+    recentSignals:Array.isArray(db.recentSignals) ? [...db.recentSignals] : [],
+    count:db.cards.length
+  };
+
+  db.sessions=db.sessions || [];
+  db.sessions.push(archived);
+  if(db.sessions.length>100) db.sessions.shift();
+
+  db.cards=[];
+  db.mode=5;
+  db.pending=null;
+  db.recentSignals=[];
+  save();
+  hideResult();
+  render();
+  alert("Sesija je sačuvana u istoriju. Krenula je nova prazna sesija.");
+}
+
+function importBackup(event){
+  const file=event.target.files[0];
+  if(!file) return;
+
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const imported=JSON.parse(reader.result);
+      const data=imported.data || imported;
+
+      if(!data || !Array.isArray(data.cards)){
+        alert("Backup fajl nije validan.");
+        return;
+      }
+
+      if(!confirm("Učitati ovaj backup i zamijeniti trenutnu bazu?")) return;
+
+      db=normalizeDB(data);
+
+      save();
+      hideResult();
+      render();
+      alert("Backup je uspješno učitan.");
+    }catch(e){
+      alert("Ne mogu pročitati backup fajl.");
+    }finally{
+      event.target.value="";
+    }
+  };
+
+  reader.readAsText(file);
+}
+
 function setMode(n){
-  db.mode=n;
+  db.mode=5;
   db.pending=null;
   save();
   hideResult();
@@ -337,11 +485,7 @@ function undo(){
 }
 
 function resetAll(){
-  if(!confirm("Resetovati sve karte i učenje?")) return;
-  db={cards:[],mode:5,pending:null,patternDB:{}};
-  save();
-  hideResult();
-  render();
+  alert("Reset je uklonjen radi sigurnosti. Koristi UNDO za zadnju kartu ili IMPORT za vraćanje backup-a.");
 }
 
 function streak(a){
@@ -354,24 +498,82 @@ function streak(a){
   return {side:last,n};
 }
 
+function mergeStatsForPattern(pattern,pick){
+  let merged={win:0,total:0};
+
+  // Active session is strongest
+  let current=db.patternDB?.[pattern]?.[pick];
+  if(current){
+    merged.win+=(current.win || 0) * 1.35;
+    merged.total+=(current.total || 0) * 1.35;
+  }
+
+  // Recent archived sessions still matter, old sessions fade
+  const sessions=(db.sessions || []).slice(-12);
+  sessions.forEach((s,idx)=>{
+    let old=s.patternDB?.[pattern]?.[pick];
+    if(old){
+      let age=sessions.length-1-idx;
+      let weight=Math.max(0.35,1-(age*0.07));
+      merged.win+=(old.win || 0) * weight;
+      merged.total+=(old.total || 0) * weight;
+    }
+  });
+
+  return merged;
+}
+
 function learnBoost(pattern,pick){
-  let r=db.patternDB[pattern]?.[pick];
-  if(!r || r.total<2) return 0;
+  let r=mergeStatsForPattern(pattern,pick);
+  if(!r || r.total<3) return 0; // minimum sample filter
   let wr=r.win/r.total;
-  if(wr>=.70) return 16;
-  if(wr>=.60) return 9;
-  if(wr<=.35) return -16;
-  if(wr<=.45) return -8;
-  return 0;
+  let sample=Math.min(1,r.total/9);
+  let boost=0;
+
+  if(wr>=.76) boost=22;
+  else if(wr>=.68) boost=16;
+  else if(wr>=.60) boost=10;
+  else if(wr>=.55) boost=5;
+  else if(wr<=.28) boost=-22;
+  else if(wr<=.38) boost=-16;
+  else if(wr<=.45) boost=-8;
+
+  return Math.round(boost*sample);
+}
+
+function streakContinuationRate(side){
+  // Looks at active + archived cards and checks how often 3 streak continued to 4.
+  let wins=0,total=0;
+  const sequences=[db.cards].concat((db.sessions||[]).slice(-12).map(s=>s.cards||[]));
+  sequences.forEach(arr=>{
+    for(let i=3;i<arr.length;i++){
+      if(arr[i-1]===side && arr[i-2]===side && arr[i-3]===side){
+        total++;
+        if(arr[i]===side) wins++;
+      }
+    }
+  });
+  if(total<4) return null;
+  return wins/total;
+}
+
+function recentLossBias(){
+  // If last 2 signals lost on same style, reduce stubborn repeats.
+  const recent=(db.recentSignals||[]).slice(-4);
+  const losses=recent.filter(x=>x.result==="LOSS");
+  if(losses.length<2) return null;
+  return losses[losses.length-1].pick;
 }
 
 function predict(){
-  let n=db.mode;
+  let n=5;
+  db.mode=5;
+
   if(db.cards.length<n){
     return {wait:true, message:"Treba još " + (n-db.cards.length) + " karti"};
   }
 
-  let recent=db.cards.slice(-n);
+  let recent=db.cards.slice(-5);
   let pattern=key(recent);
   let r=recent.filter(x=>x==="R").length;
   let b=recent.filter(x=>x==="B").length;
@@ -379,62 +581,132 @@ function predict(){
   let red=50, black=50;
   let why=[];
 
+  // 1) Full 5-card pattern learning has priority when enough samples exist.
+  let redLearn=learnBoost(pattern,"RED");
+  let blackLearn=learnBoost(pattern,"BLACK");
+  red+=redLearn;
+  black+=blackLearn;
+  if(Math.abs(redLearn-blackLearn)>=6) why.push("5-card learning");
+
+  // 2) Streak continuation filter: not blindly opposite.
   if(s.n>=3){
-    let boost=18+Math.min(10,(s.n-3)*4);
-    if(s.side==="R"){ black+=boost; why.push("RED streak"); }
-    else { red+=boost; why.push("BLACK streak"); }
+    let streakSide=s.side==="R" ? "RED" : "BLACK";
+    let opposite=streakSide==="RED" ? "BLACK" : "RED";
+    let sideShort=s.side;
+    let contRate=streakContinuationRate(sideShort);
+
+    let continueBoost=0;
+    let breakBoost=0;
+
+    if(contRate!==null){
+      if(contRate>=0.58){
+        continueBoost+=16;
+        why.push("streak continues");
+      }else if(contRate<=0.42){
+        breakBoost+=16;
+        why.push("streak breaks");
+      }else{
+        continueBoost+=6;
+        breakBoost+=6;
+        why.push("mixed streak");
+      }
+    }else{
+      // Without data: 3 streak gets continuation chance; 5+ leans break.
+      if(s.n===3) continueBoost+=12;
+      else if(s.n===4){ continueBoost+=5; breakBoost+=9; }
+      else breakBoost+=15;
+      why.push(streakSide+" streak");
+    }
+
+    // If exact 5-card learning disagrees, learning already added above and can override.
+    if(streakSide==="RED"){
+      red+=continueBoost;
+      black+=breakBoost;
+    }else{
+      black+=continueBoost;
+      red+=breakBoost;
+    }
   }
 
-  if(r-b>=2){ black+=13; why.push("RED balance"); }
-  if(b-r>=2){ red+=13; why.push("BLACK balance"); }
-
-  let alt=true;
-  for(let i=1;i<recent.length;i++){
-    if(recent[i]===recent[i-1]){ alt=false; break; }
-  }
-  if(alt){
-    let next=recent[recent.length-1]==="R" ? "BLACK" : "RED";
-    if(next==="RED") red+=14; else black+=14;
-    why.push("alternacija");
-  }
-
-  let last4=recent.slice(-4).join("");
-  let rules={
-    RRBB:["RED",9],
-    BBRR:["BLACK",9],
-    RBRR:["BLACK",8],
-    BRBB:["RED",8],
-    RRBR:["BLACK",7],
-    BBRB:["RED",7]
+  // 3) Shape/pattern rules for 5-card structure.
+  const p5=recent.join("");
+  const last4=recent.slice(-4).join("");
+  const rules5={
+    RRRBR:["RED",12], BBBRB:["BLACK",12],
+    RBRRR:["RED",10], BRBBB:["BLACK",10],
+    RBBBB:["BLACK",10], BRRRR:["RED",10],
+    RRBRR:["RED",9], BBRBB:["BLACK",9],
+    RBBBR:["BLACK",8], BRRRB:["RED",8],
+    RBRBR:["BLACK",12], BRBRB:["RED",12],
+    RRBBR:["RED",9], BBRRB:["BLACK",9]
   };
-  if(rules[last4]){
-    let ru=rules[last4];
+  if(rules5[p5]){
+    let ru=rules5[p5];
     if(ru[0]==="RED") red+=ru[1]; else black+=ru[1];
-    why.push(last4);
+    why.push("5-pattern");
   }
 
-  if(Math.abs(red-black)<7){
-    if(db.cards[db.cards.length-1]==="R"){ black+=5; why.push("last RED"); }
-    else { red+=5; why.push("last BLACK"); }
+  const rules4={
+    RRBB:["RED",7], BBRR:["BLACK",7],
+    RBRR:["BLACK",6], BRBB:["RED",6],
+    RRBR:["RED",6], BBRB:["BLACK",6],
+    RBRB:["RED",8], BRBR:["BLACK",8]
+  };
+  if(rules4[last4]){
+    let ru=rules4[last4];
+    if(ru[0]==="RED") red+=ru[1]; else black+=ru[1];
+    why.push("tail pattern");
+  }
+
+  // 4) Session mood: choppy vs streaky hidden filter.
+  let last20=db.cards.slice(-20);
+  if(last20.length>=12){
+    let alternations=0,repeats=0;
+    for(let i=1;i<last20.length;i++){
+      if(last20[i]!==last20[i-1]) alternations++;
+      else repeats++;
+    }
+    let altRate=alternations/(last20.length-1);
+    if(altRate>=0.64){
+      let next=db.cards[db.cards.length-1]==="R" ? "BLACK" : "RED";
+      if(next==="RED") red+=8; else black+=8;
+      why.push("choppy mode");
+    }else if(altRate<=0.42){
+      let next=db.cards[db.cards.length-1]==="R" ? "RED" : "BLACK";
+      if(next==="RED") red+=8; else black+=8;
+      why.push("streaky mode");
+    }
+  }
+
+  // 5) Dominance is now mild; it should not overpower pattern learning.
+  if(r-b>=3){ black+=6; why.push("red heavy"); }
+  else if(b-r>=3){ red+=6; why.push("black heavy"); }
+  else if(r-b===1){ red+=2; }
+  else if(b-r===1){ black+=2; }
+
+  // 6) Adaptive correction after repeated losses: if same side recently lost, slightly reduce it.
+  let bad=recentLossBias();
+  if(bad==="RED"){ red-=6; why.push("loss adjust"); }
+  if(bad==="BLACK"){ black-=6; why.push("loss adjust"); }
+
+  // 7) If still tight, use momentum, not automatic opposite.
+  if(Math.abs(red-black)<6){
+    if(db.cards[db.cards.length-1]==="R"){ red+=4; why.push("momentum"); }
+    else { black+=4; why.push("momentum"); }
   }
 
   let pick=red>=black ? "RED" : "BLACK";
-  if(pick==="RED") red+=learnBoost(pattern,"RED");
-  else black+=learnBoost(pattern,"BLACK");
-
-  pick=red>=black ? "RED" : "BLACK";
   let diff=Math.abs(red-black);
-  let conf=Math.max(52,Math.min(82,50+Math.round(diff*.78)));
+  let conf=Math.max(52,Math.min(86,50+Math.round(diff*.72)));
 
   return {
     wait:false,
     pick,
     pattern,
     conf: conf + "%",
-    reason: why.length ? "Signal baziran na: " + why.slice(0,2).join(" + ") : "Predikcija spremna."
+    reason: why.length ? "Signal: " + why.slice(0,2).join(" + ") : "Predikcija spremna."
   };
 }
-
 function generate(){
   let p=predict();
   if(p.wait){
@@ -485,6 +757,16 @@ function mark(win){
   db.patternDB[pat][predicted].total++;
   if(win) db.patternDB[pat][predicted].win++;
 
+  db.recentSignals=db.recentSignals || [];
+  db.recentSignals.push({
+    pattern:pat,
+    pick:predicted,
+    result:win ? "WIN" : "LOSS",
+    actual:actual,
+    time:Date.now()
+  });
+  if(db.recentSignals.length>60) db.recentSignals.shift();
+
   db.pending=null;
   save();
   hideResult();
@@ -496,18 +778,17 @@ function hideResult(){
 }
 
 function render(pop){
-  $("m4").classList.toggle("active",db.mode===4);
-  $("m5").classList.toggle("active",db.mode===5);
-  $("modeText").textContent="LAST " + db.mode;
+  db.mode=5;
+  $("modeText") && ($("modeText").textContent="LAST 5");
 
-  let recent=db.cards.slice(-db.mode);
-  $("countText").textContent=Math.min(recent.length,db.mode)+"/"+db.mode;
+  let recent=db.cards.slice(-5);
+  $("countText").textContent=Math.min(recent.length,5)+"/5";
 
   let preview=$("preview");
   preview.innerHTML="";
   for(let i=0;i<5;i++){
     let slot=document.createElement("div");
-    let val=i<5-db.mode ? "" : recent[i-(5-db.mode)];
+    let val=recent[i];
     slot.className="slot";
     if(val==="R"){slot.className+=" r";slot.textContent="R";}
     else if(val==="B"){slot.className+=" b";slot.textContent="B";}
