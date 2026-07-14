@@ -2,61 +2,418 @@
 <html lang="bs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Red Black Predictor Pro</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Red / Black Predictor — V9 Clean Start</title>
 <style>
-:root{--panel:#10141f;--line:#293143;--muted:#8f98ad;--text:#f7f8ff;--gold:#f5bd43;--red:#ef263d}
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100vh;color:var(--text);display:flex;justify-content:center;padding:14px;background:radial-gradient(circle at 50% -12%,rgba(245,189,67,.23),transparent 34%),radial-gradient(circle at 12% 8%,rgba(239,38,61,.13),transparent 30%),linear-gradient(180deg,#07080d,#05060a 72%)}
-.app{width:100%;max-width:430px;min-height:calc(100vh - 28px);background:rgba(11,14,21,.97);border:1px solid rgba(255,255,255,.08);border-radius:30px;box-shadow:0 24px 70px rgba(0,0,0,.72);overflow:hidden;display:flex;flex-direction:column}
-.header{padding:22px 18px 14px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,.055),transparent);border-bottom:1px solid rgba(255,255,255,.06)}
-h1{margin:0;font-size:26px;font-weight:950}h1 span{color:var(--gold)}.sub{color:var(--muted);font-size:13px;margin-top:7px;line-height:1.35}
-.main{padding:16px;display:flex;flex-direction:column;gap:14px;flex:1}
-.panel{background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.01)),var(--panel);border:1px solid var(--line);border-radius:24px;padding:15px;box-shadow:0 12px 28px rgba(0,0,0,.18)}
-.topline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.title{font-size:15px;font-weight:950}.hint{color:var(--muted);font-size:12px;font-weight:800}
-.preview{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.slot{height:58px;border-radius:18px;background:#0a0d14;border:1px dashed #343d53;color:#4f596f;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:18px;position:relative;overflow:hidden}
-.slot:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 45%);pointer-events:none}.slot.r{background:linear-gradient(135deg,#b90b1e,#ff3048);border-color:#ff6373;color:white}.slot.b{background:linear-gradient(135deg,#000,#343a47);border-color:#626b7e;color:white}
-.inputs,.feedback,.tools{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px}
-button{border:0;border-radius:18px;padding:15px;color:white;font-size:16px;font-weight:950;cursor:pointer;transition:transform .12s,opacity .12s;user-select:none}button:active{transform:scale(.972);opacity:.86}
-.redbtn{background:linear-gradient(135deg,#bc0b1f,#ff3048)}.blackbtn{background:linear-gradient(135deg,#000,#3a4150);border:1px solid #555f72}.undo{background:#202635;border:1px solid #394257;color:#d8dded}.newsession{background:linear-gradient(135deg,#24314d,#3b4f7a);border:1px solid #53699a;color:#e7ecff}.backup{background:#182b20;border:1px solid #2f6b45;color:#bfffd2}.import{background:#1d2234;border:1px solid #3b4868;color:#d9e2ff}.generate{width:100%;padding:18px;border-radius:22px;background:linear-gradient(135deg,#ffd85d,#eaa01a);color:#111;font-size:21px;box-shadow:0 14px 30px rgba(245,189,67,.18)}
-.result{margin-top:auto;background:radial-gradient(circle at top,rgba(245,189,67,.18),transparent 55%),linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.01)),#0f131d;border:1px solid #31384c;border-radius:28px;padding:18px;text-align:center;min-height:250px;display:flex;flex-direction:column;justify-content:center}.result.hidden{display:none}
-.resultLabel{color:var(--muted);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;font-weight:950;margin-bottom:11px}.card{width:118px;height:156px;border-radius:20px;margin:0 auto 13px;background:#f4f5f8;color:#111;display:flex;align-items:center;justify-content:center;font-size:68px;font-weight:950;border:2px solid rgba(255,255,255,.9);box-shadow:0 20px 38px rgba(0,0,0,.48);animation:pop .22s ease-out}.card.red{color:var(--red)}.card.black{color:#050505}@keyframes pop{from{transform:translateY(10px) scale(.94);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-.signal{font-size:39px;font-weight:950;margin-bottom:7px}.signal.red{color:#ff354b}.signal.black{color:#f4f4f4}.conf{display:inline-block;margin:0 auto;padding:8px 14px;border-radius:999px;background:rgba(245,189,67,.13);border:1px solid rgba(245,189,67,.32);color:#ffe2a2;font-size:14px;font-weight:950}.reason{color:#9aa3b8;font-size:13px;line-height:1.35;margin-top:11px;min-height:18px}.win{background:linear-gradient(135deg,#12883b,#27d767)}.lose{background:linear-gradient(135deg,#8a1118,#ff3f4f)}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.meta div{background:#0a0d14;border:1px solid #242b3c;border-radius:14px;padding:9px 6px}.meta strong{display:block;font-size:16px}.meta span{color:var(--muted);font-size:11px}.footer{text-align:center;color:#737d92;font-size:11.5px;line-height:1.35;padding:0 8px 2px}input[type=file]{display:none}
+:root{
+  --bg:#05070b;--panel:#10141d;--panel2:#0b0e15;--line:#263044;--muted:#8792a7;--text:#f7f8fc;
+  --gold:#f3bd4d;--gold2:#ffe79d;--red:#f23149;--green:#27d478;--blue:#6f8dff;--shadow:0 28px 90px rgba(0,0,0,.58)
+}
+*{box-sizing:border-box;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body,button{touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg)}
+body{margin:0;min-height:100vh;display:flex;justify-content:center;padding:14px;color:var(--text);background:
+ radial-gradient(circle at 50% -12%,rgba(243,189,77,.22),transparent 32%),
+ radial-gradient(circle at 3% 18%,rgba(242,49,73,.11),transparent 28%),
+ radial-gradient(circle at 98% 35%,rgba(111,141,255,.09),transparent 31%),
+ linear-gradient(180deg,#080a10 0%,#05060a 74%)}
+.app{width:100%;max-width:438px;min-height:calc(100vh - 28px);background:rgba(9,12,18,.97);border:1px solid rgba(255,255,255,.075);border-radius:32px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;backdrop-filter:blur(18px)}
+.header{padding:24px 20px 17px;text-align:center;border-bottom:1px solid rgba(255,255,255,.06);background:linear-gradient(180deg,rgba(255,255,255,.052),transparent)}
+.brand{display:flex;align-items:center;justify-content:center;gap:10px}.brandMark{width:37px;height:37px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,#f8d26f,#d99a25);color:#171008;font-size:18px;box-shadow:0 10px 24px rgba(243,189,77,.22)}
+h1{margin:0;font-size:24px;font-weight:950;line-height:1.05;letter-spacing:-.7px}h1 span{color:var(--gold)}
+.sub{max-width:350px;margin:9px auto 0;color:var(--muted);font-size:12.4px;line-height:1.45}.badge{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 11px;border-radius:999px;border:1px solid rgba(111,141,255,.31);background:rgba(111,141,255,.10);color:#dce4ff;font-size:10.3px;font-weight:950;letter-spacing:.7px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 13px rgba(39,212,120,.85)}
+.main{padding:16px;display:flex;flex-direction:column;gap:13px;flex:1}.panel{background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.007)),var(--panel);border:1px solid var(--line);border-radius:25px;padding:16px;box-shadow:0 14px 36px rgba(0,0,0,.18)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.title{font-size:15px;font-weight:950}.phase{color:#dbe2f2;font-size:10.7px;font-weight:950;padding:6px 9px;border-radius:999px;background:#171d29;border:1px solid #2d374b;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.slot{height:62px;border-radius:18px;background:#090c12;border:1px dashed #343e54;color:#59657b;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:18px;position:relative;overflow:hidden}.slot:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.09),transparent 48%);pointer-events:none}.slot small{position:absolute;left:7px;top:5px;font-size:8px;color:rgba(255,255,255,.5);z-index:1}.slot.r{background:linear-gradient(145deg,#aa0d22,#ff344e);border-color:#ff6578;color:#fff;box-shadow:0 9px 22px rgba(242,49,73,.18)}.slot.b{background:linear-gradient(145deg,#020304,#353d4b);border-color:#657084;color:#fff;box-shadow:0 9px 22px rgba(0,0,0,.28)}
+.inputs,.feedback{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px}button{border:0;border-radius:18px;padding:15px;color:white;font-size:15px;font-weight:950;cursor:pointer;transition:transform .12s ease,opacity .12s ease,filter .12s ease;user-select:none;letter-spacing:.12px}button:hover{filter:brightness(1.05)}button:active{transform:scale(.973);opacity:.87}button:disabled{opacity:.32;cursor:not-allowed;transform:none;filter:none}.redbtn{background:linear-gradient(135deg,#b60e24,#ff3650);box-shadow:0 11px 24px rgba(242,49,73,.17)}.blackbtn{background:linear-gradient(135deg,#050608,#3d4656);border:1px solid #59657a;box-shadow:0 11px 24px rgba(0,0,0,.22)}
+.generate{width:100%;margin-top:11px;padding:17px 15px;border-radius:20px;background:linear-gradient(135deg,#ffe17b,#eba72d);color:#171107;font-size:17px;box-shadow:0 13px 30px rgba(243,189,77,.20)}.generate.ready{animation:pulse 1.65s ease-in-out infinite}@keyframes pulse{0%,100%{box-shadow:0 13px 30px rgba(243,189,77,.18)}50%{box-shadow:0 13px 34px rgba(243,189,77,.34)}}
+.helper{text-align:center;color:var(--muted);font-size:11.4px;line-height:1.4;margin-top:10px;min-height:16px}.attempts{display:flex;justify-content:center;gap:7px;margin-top:12px}.attempt{width:34px;height:7px;border-radius:99px;background:#252d3e;border:1px solid #333d52}.attempt.done{background:var(--green);border-color:#4be190;box-shadow:0 0 11px rgba(39,212,120,.28)}.attempt.active{background:var(--gold);border-color:#ffe298;box-shadow:0 0 11px rgba(243,189,77,.28)}
+.result{background:radial-gradient(circle at top,rgba(243,189,77,.18),transparent 55%),linear-gradient(145deg,rgba(255,255,255,.052),rgba(255,255,255,.008)),#0f131d;border:1px solid #313a4f;border-radius:28px;padding:20px;text-align:center;min-height:283px;display:flex;flex-direction:column;justify-content:center;box-shadow:0 18px 38px rgba(0,0,0,.21)}.result.hidden{display:none}.resultLabel{color:var(--muted);font-size:10.5px;letter-spacing:1.42px;text-transform:uppercase;font-weight:950;margin-bottom:10px}.card{width:112px;height:148px;border-radius:21px;margin:0 auto 13px;background:linear-gradient(155deg,#fff,#e6e8ee);color:#111;display:flex;align-items:center;justify-content:center;font-size:65px;font-weight:950;border:2px solid rgba(255,255,255,.92);box-shadow:0 22px 42px rgba(0,0,0,.50);animation:pop .22s ease-out}.card.red{color:var(--red)}.card.black{color:#050505}@keyframes pop{from{transform:translateY(10px) scale(.94);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}.signal{font-size:38px;font-weight:950;margin-bottom:8px;letter-spacing:-.8px}.signal.red{color:#ff3a53}.signal.black{color:#f6f7fa}.conf{display:inline-block;margin:0 auto;padding:8px 14px;border-radius:999px;background:rgba(243,189,77,.12);border:1px solid rgba(243,189,77,.31);color:#ffe6aa;font-size:13.5px;font-weight:950}.resultHint{color:#aab3c7;font-size:11.5px;line-height:1.4;margin-top:10px}.win{background:linear-gradient(135deg,#118940,#29d879)}.lose{background:linear-gradient(135deg,#8d111b,#ff4053)}
+.undoRow{display:flex;justify-content:center}.undo{width:58%;padding:12px 15px;background:#1c2230;border:1px solid #354057;color:#dfe4f1;font-size:13px}.database{margin-top:auto;padding:14px 15px;background:linear-gradient(145deg,rgba(255,255,255,.035),transparent),var(--panel2);border:1px solid #222b3b;border-radius:21px}.databaseHead{display:flex;justify-content:space-between;align-items:center;gap:12px}.databaseTitle{font-size:12px;font-weight:950;color:#d8deeb}.databaseCount{font-size:11px;color:var(--muted)}.dbStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.dbStat{padding:10px 8px;text-align:center;border-radius:14px;background:#090c12;border:1px solid #222a39}.dbStat strong{display:block;font-size:16px}.dbStat span{font-size:9.8px;color:var(--muted)}.dataTools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.dataTools button{padding:11px 9px;border-radius:14px;font-size:11.5px}.backup{background:#172b20;border:1px solid #2c6944;color:#c6ffd8}.import{background:#1b2131;border:1px solid #394764;color:#dce4ff}.backupMeta{text-align:center;color:#6f798c;font-size:10.2px;line-height:1.35;margin-top:8px}.footer{text-align:center;color:#687286;font-size:10.5px;line-height:1.45;padding:0 7px 2px}input[type=file]{display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,18px);width:min(390px,calc(100% - 36px));padding:13px 15px;border-radius:16px;background:#151b27;border:1px solid #34405a;color:#eef2ff;font-size:12.5px;font-weight:850;line-height:1.4;box-shadow:0 18px 46px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:.22s ease;z-index:20}.toast.show{opacity:1;transform:translate(-50%,0)}.toast.success{border-color:rgba(39,212,120,.45);background:#11251a;color:#d4ffe2}.toast.warn{border-color:rgba(243,189,77,.45);background:#2a2213;color:#ffe7ad}
 </style>
 </head>
 <body>
 <main class="app">
-<header class="header"><h1>Red / Black <span>Predictor</span></h1><div class="sub">Unesi poslednjih 5 karata sa leva na desno. Sistem traži isti niz u bazi i daje sledeću boju.</div></header>
+<header class="header">
+  <div class="brand"><div class="brandMark">◆</div><h1>Red / Black <span>Triple AI</span></h1></div>
+</header>
 <div class="main">
-<section class="panel"><div class="topline"><div class="title">1. Unesi poslednjih 5 karata</div><div id="countText" class="hint">0/5</div></div><div id="preview" class="preview"></div><div class="inputs"><button class="redbtn" onclick="addCard('R')">RED</button><button class="blackbtn" onclick="addCard('B')">BLACK</button></div></section>
-<div class="tools"><button class="undo" onclick="undo()">UNDO</button><button class="newsession" onclick="newSession()">NEW SESSION</button></div>
-<div class="tools"><button class="backup" onclick="downloadBackup()">BACKUP</button><button class="import" onclick="openImport()">IMPORT DB</button><input id="importFile" type="file" accept="application/json,.json" onchange="importBackup(event)"></div>
-<button class="generate" onclick="generate()">GENERATE</button>
-<section id="result" class="result hidden"><div class="resultLabel">Predikcija</div><div id="card" class="card red">♥</div><div id="signal" class="signal red">RED</div><div id="conf" class="conf">0%</div><div id="reason" class="reason">Predlog spreman.</div><div class="meta"><div><strong id="matches">0</strong><span>poklapanja</span></div><div><strong id="patternText">-----</strong><span>niz</span></div></div><div class="feedback"><button class="win" onclick="mark(true)">TAČNO</button><button class="lose" onclick="mark(false)">NETAČNO</button></div></section>
-<div class="footer">Ugrađena je početna sintetička baza od 300.000 zapisa. IMPORT DB može ubaciti novu/bogatu bazu.</div>
-</div></main>
+  <section class="panel">
+    <div class="topline"><div class="title">Posljednjih 5 karata</div><div id="phase" class="phase">UNOS 0/5</div></div>
+    <div id="grid" class="grid"></div>
+    <div class="inputs"><button id="redInput" class="redbtn" onclick="addCard('R')">RED</button><button id="blackInput" class="blackbtn" onclick="addCard('B')">BLACK</button></div>
+    <button id="generateBtn" class="generate" onclick="generateSignal()">GENERATE</button>
+    <div id="helper" class="helper">Unesi prvih 5 stvarnih boja.</div>
+    <div class="attempts" aria-label="Napredak pokušaja"><span id="try1" class="attempt"></span><span id="try2" class="attempt"></span><span id="try3" class="attempt"></span></div>
+  </section>
+
+  <section id="result" class="result hidden">
+    <div id="resultLabel" class="resultLabel">Predikcija • pokušaj 1/3</div>
+    <div id="card" class="card red">♥</div>
+    <div id="signal" class="signal red">RED</div>
+    <div id="conf" class="conf">50.0% confidence</div>
+    <div class="resultHint">Unesi stvarnu RED/BLACK kartu ili označi TAČNO / NETAČNO.</div>
+    <div class="feedback"><button class="win" onclick="mark(true)">TAČNO</button><button class="lose" onclick="mark(false)">NETAČNO</button></div>
+  </section>
+
+  <div class="undoRow"><button id="undoBtn" class="undo" onclick="undo()">UNDO POSLJEDNJU KARTU</button></div>
+
+  <section class="database">
+    <div class="databaseHead"><div class="databaseTitle">Baza i sigurnosna kopija</div><div id="databaseCount" class="databaseCount">0 zapisa</div></div>
+    <div class="dbStats">
+      <div class="dbStat"><strong id="sessionCount">0</strong><span>mini-sesija 5+3</span></div>
+      <div class="dbStat"><strong id="macroCount">0</strong><span>konteksta 2/4/8</span></div>
+      <div class="dbStat"><strong id="feedbackCount">0</strong><span>potvrđenih signala</span></div>
+    </div>
+    <div class="dataTools"><button class="backup" onclick="downloadBackup()">BACKUP</button><button class="import" onclick="openImport()">IMPORT DB</button><input id="importFile" type="file" accept="application/json,.json,.txt" onchange="importDatabase(event)"></div>
+    <div id="backupMeta" class="backupMeta">Baza se automatski čuva na ovom uređaju.</div>
+  </section>
+</div>
+</main>
+<div id="toast" class="toast"></div>
 <script>
-const STARTER_DB = {"app": "red-black-card-predictor", "version": 1, "type": "summary-pattern-db", "createdAt": "2026-06-04T18:25:56.312864Z", "warning": "Synthetic seed database for app testing and initial weighting. It is not real Novomatic/slot outcome data.", "totalObservations": 300000, "patternLength": 5, "symbols": ["R", "B"], "patterns": {"RRRRR": {"total": 6373, "RED": 2420, "BLACK": 3953, "pRed": 0.3797, "pBlack": 0.6203, "source": "synthetic_seed"}, "RRRRB": {"total": 8982, "RED": 4133, "BLACK": 4849, "pRed": 0.4601, "pBlack": 0.5399, "source": "synthetic_seed"}, "RRRBR": {"total": 10951, "RED": 5357, "BLACK": 5594, "pRed": 0.4892, "pBlack": 0.5108, "source": "synthetic_seed"}, "RRRBB": {"total": 7456, "RED": 3624, "BLACK": 3832, "pRed": 0.4861, "pBlack": 0.5139, "source": "synthetic_seed"}, "RRBRR": {"total": 11793, "RED": 5702, "BLACK": 6091, "pRed": 0.4835, "pBlack": 0.5165, "source": "synthetic_seed"}, "RRBRB": {"total": 9177, "RED": 4578, "BLACK": 4599, "pRed": 0.4989, "pBlack": 0.5011, "source": "synthetic_seed"}, "RRBBR": {"total": 7516, "RED": 3830, "BLACK": 3686, "pRed": 0.5096, "pBlack": 0.4904, "source": "synthetic_seed"}, "RRBBB": {"total": 11787, "RED": 5590, "BLACK": 6197, "pRed": 0.4743, "pBlack": 0.5257, "source": "synthetic_seed"}, "RBRRR": {"total": 8846, "RED": 4886, "BLACK": 3960, "pRed": 0.5523, "pBlack": 0.4477, "source": "synthetic_seed"}, "RBRRB": {"total": 11848, "RED": 5551, "BLACK": 6297, "pRed": 0.4685, "pBlack": 0.5315, "source": "synthetic_seed"}, "RBRBR": {"total": 8612, "RED": 3273, "BLACK": 5339, "pRed": 0.3801, "pBlack": 0.6199, "source": "synthetic_seed"}, "RBRBB": {"total": 7645, "RED": 3824, "BLACK": 3821, "pRed": 0.5002, "pBlack": 0.4998, "source": "synthetic_seed"}, "RBBRR": {"total": 9409, "RED": 4653, "BLACK": 4756, "pRed": 0.4945, "pBlack": 0.5055, "source": "synthetic_seed"}, "RBBRB": {"total": 9157, "RED": 4685, "BLACK": 4472, "pRed": 0.5116, "pBlack": 0.4884, "source": "synthetic_seed"}, "RBBBR": {"total": 8940, "RED": 4356, "BLACK": 4584, "pRed": 0.4872, "pBlack": 0.5128, "source": "synthetic_seed"}, "RBBBB": {"total": 9817, "RED": 5013, "BLACK": 4804, "pRed": 0.5106, "pBlack": 0.4894, "source": "synthetic_seed"}, "BRRRR": {"total": 7669, "RED": 3809, "BLACK": 3860, "pRed": 0.4967, "pBlack": 0.5033, "source": "synthetic_seed"}, "BRRRB": {"total": 10550, "RED": 5486, "BLACK": 5064, "pRed": 0.52, "pBlack": 0.48, "source": "synthetic_seed"}, "BRRBR": {"total": 8015, "RED": 3931, "BLACK": 4084, "pRed": 0.4905, "pBlack": 0.5095, "source": "synthetic_seed"}, "BRRBB": {"total": 8968, "RED": 4574, "BLACK": 4394, "pRed": 0.51, "pBlack": 0.49, "source": "synthetic_seed"}, "BRBRR": {"total": 7372, "RED": 3434, "BLACK": 3938, "pRed": 0.4658, "pBlack": 0.5342, "source": "synthetic_seed"}, "BRBRB": {"total": 11933, "RED": 7385, "BLACK": 4548, "pRed": 0.6189, "pBlack": 0.3811, "source": "synthetic_seed"}, "BRBBR": {"total": 9968, "RED": 5350, "BLACK": 4618, "pRed": 0.5367, "pBlack": 0.4633, "source": "synthetic_seed"}, "BRBBB": {"total": 9147, "RED": 4116, "BLACK": 5031, "pRed": 0.45, "pBlack": 0.55, "source": "synthetic_seed"}, "BBRRR": {"total": 8462, "RED": 4509, "BLACK": 3953, "pRed": 0.5329, "pBlack": 0.4671, "source": "synthetic_seed"}, "BBRRB": {"total": 11710, "RED": 5819, "BLACK": 5891, "pRed": 0.4969, "pBlack": 0.5031, "source": "synthetic_seed"}, "BBRBR": {"total": 8924, "RED": 4523, "BLACK": 4401, "pRed": 0.5068, "pBlack": 0.4932, "source": "synthetic_seed"}, "BBRBB": {"total": 11915, "RED": 6254, "BLACK": 5661, "pRed": 0.5249, "pBlack": 0.4751, "source": "synthetic_seed"}, "BBBRR": {"total": 10326, "RED": 5320, "BLACK": 5006, "pRed": 0.5152, "pBlack": 0.4848, "source": "synthetic_seed"}, "BBBRB": {"total": 10858, "RED": 5156, "BLACK": 5702, "pRed": 0.4749, "pBlack": 0.5251, "source": "synthetic_seed"}, "BBBBR": {"total": 6663, "RED": 3651, "BLACK": 3012, "pRed": 0.548, "pBlack": 0.452, "source": "synthetic_seed"}, "BBBBB": {"total": 9211, "RED": 5705, "BLACK": 3506, "pRed": 0.6194, "pBlack": 0.3806, "source": "synthetic_seed"}}};
-const STORAGE_KEY = "rb_predictor_pro_v1";
-let state = loadState();
-const $ = id => document.getElementById(id);
-function defaultState(){return {cards:[],pending:null,sessions:[],userStats:{},database:STARTER_DB};}
-function loadState(){const saved=localStorage.getItem(STORAGE_KEY);if(saved){try{const s=JSON.parse(saved);if(!s.database)s.database=STARTER_DB;if(!s.userStats)s.userStats={};if(!Array.isArray(s.cards))s.cards=[];if(!Array.isArray(s.sessions))s.sessions=[];s.pending=null;return s;}catch(e){}}return defaultState();}
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
-function addCard(c){state.cards.push(c);if(state.cards.length>500)state.cards.shift();state.pending=null;hideResult();save();render();}
-function undo(){state.cards.pop();state.pending=null;hideResult();save();render();}
-function newSession(){if(state.cards.length){state.sessions.push({createdAt:new Date().toISOString(),cards:[...state.cards],userStats:JSON.parse(JSON.stringify(state.userStats||{}))});if(state.sessions.length>100)state.sessions.shift();}state.cards=[];state.pending=null;hideResult();save();render();}
-function patternKey(){return state.cards.slice(-5).join("");}
-function normalizePatternStats(pattern){const base=state.database?.patterns?.[pattern]||{total:0,RED:0,BLACK:0};const user=state.userStats?.[pattern]||{RED:0,BLACK:0,total:0};const userWeight=user.total>=10?18:user.total>=5?10:user.total>=2?5:2;const red=(base.RED||0)+(user.RED||0)*userWeight;const black=(base.BLACK||0)+(user.BLACK||0)*userWeight;return {red,black,total:red+black,baseTotal:base.total||0,userTotal:user.total||0};}
-function generate(){if(state.cards.length<5){showMessage("DODAJ","Treba još "+(5-state.cards.length),"Unesi tačno 5 poslednjih karata sa leva na desno.");return;}const pattern=patternKey();const stats=normalizePatternStats(pattern);let pick=stats.red>=stats.black?"RED":"BLACK";let max=Math.max(stats.red,stats.black);let probability=stats.total?Math.round((max/stats.total)*1000)/10:50;probability=Math.max(50.1,Math.min(86,probability));state.pending={pattern,pick};save();$("result").classList.remove("hidden");$("card").textContent=pick==="RED"?"♥":"♠";$("card").className="card "+(pick==="RED"?"red":"black");$("signal").textContent=pick;$("signal").className="signal "+(pick==="RED"?"red":"black");$("conf").textContent=probability+"%";$("reason").textContent="Najčešća sledeća boja za ovaj niz u bazi.";$("matches").textContent=Math.round(stats.baseTotal+stats.userTotal).toLocaleString("sr-RS");$("patternText").textContent=pattern;setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}),60);}
-function showMessage(signal,conf,reason){$("result").classList.remove("hidden");$("card").textContent="?";$("card").className="card red";$("signal").textContent=signal;$("signal").className="signal red";$("conf").textContent=conf;$("reason").textContent=reason;$("matches").textContent="0";$("patternText").textContent="-----";}
-function mark(correct){if(!state.pending)return;const predicted=state.pending.pick;const actual=correct?predicted:(predicted==="RED"?"BLACK":"RED");const pattern=state.pending.pattern;if(!state.userStats[pattern])state.userStats[pattern]={RED:0,BLACK:0,total:0};state.userStats[pattern][actual]++;state.userStats[pattern].total++;state.cards.push(actual==="RED"?"R":"B");if(state.cards.length>500)state.cards.shift();state.pending=null;hideResult();save();render();}
-function hideResult(){$("result").classList.add("hidden");}
-function downloadBackup(){const backup={app:"red-black-card-predictor",version:1,exportedAt:new Date().toISOString(),state};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="red-black-predictor-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);}
-function openImport(){$("importFile").click();}
-function importBackup(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(){try{const imported=JSON.parse(reader.result);if(imported.patterns&&imported.patternLength===5){state.database=imported;state.pending=null;save();alert("Baza je ubačena: "+(imported.totalObservations||0).toLocaleString("sr-RS")+" zapisa.");render();return;}if(imported.state){state=imported.state;if(!state.database)state.database=STARTER_DB;if(!state.userStats)state.userStats={};state.pending=null;save();alert("Backup aplikacije je vraćen.");render();return;}alert("Fajl nije validna baza ili backup.");}catch(e){alert("Ne mogu pročitati JSON fajl.");}finally{event.target.value="";}};reader.readAsText(file);}
-function render(){const recent=state.cards.slice(-5);$("countText").textContent=Math.min(recent.length,5)+"/5";const preview=$("preview");preview.innerHTML="";for(let i=0;i<5;i++){const slot=document.createElement("div");const val=recent[i];slot.className="slot";if(val==="R"){slot.className+=" r";slot.textContent="R";}else if(val==="B"){slot.className+=" b";slot.textContent="B";}else slot.textContent="–";preview.appendChild(slot);}}
+document.addEventListener("gesturestart", function(event){ event.preventDefault(); }, {passive:false});
+const STORAGE_KEY="rb_predictor_triple_session_v9_clean_start_20260714";
+const LEGACY_KEYS=[]; // Clean Start: ne učitava podatke iz starijih verzija.
+const SEED_LENGTH=5;
+const TRIES_PER_SESSION=3;
+const SESSION_LENGTH=SEED_LENGTH+TRIES_PER_SESSION;
+const MAX_DATABASE_SESSIONS=30000;
+const MACRO_HORIZONS=[1,2,4,8];
+const $=id=>document.getElementById(id);
+function safeGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function safeSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){alert("Memorija preglednika je puna. Napravi BACKUP prije nastavka.");return false}}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function hashString(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16)}
+function normalizeSymbol(v){
+  if(v===null||v===undefined)return null;
+  if(v===true||v===1)return "R";if(v===false||v===0)return "B";
+  if(typeof v==="string"){
+    const x=v.trim().toUpperCase();
+    if(["R","RED","CRVENA","CRVENO","HEART","HEARTS","♥"].includes(x))return "R";
+    if(["B","BLACK","CRNA","CRNO","SPADE","SPADES","♠"].includes(x))return "B";
+  }
+  if(typeof v==="object")for(const k of ["actual","color","colour","symbol","value","result","card","outcome"]){if(Object.prototype.hasOwnProperty.call(v,k)){const c=normalizeSymbol(v[k]);if(c)return c}}
+  return null;
+}
+function normalizeSequence(v){
+  if(!v)return [];
+  if(typeof v==="string"){
+    const compact=v.trim().toUpperCase().replace(/[^RB]/g,"");
+    if(compact.length)return compact.split("");
+    return v.split(/[\s,;|/\n\r]+/).map(normalizeSymbol).filter(Boolean);
+  }
+  if(!Array.isArray(v))return [];
+  const out=[];
+  for(const item of v){
+    if(Array.isArray(item))out.push(...normalizeSequence(item));
+    else if(typeof item==="string"&&/^[RB]+$/i.test(item.trim()))out.push(...item.trim().toUpperCase().split(""));
+    else{const c=normalizeSymbol(item);if(c)out.push(c)}
+  }
+  return out;
+}
+function longestStreak(seq){let best=0,current=0,last=null;for(const c of seq){if(c===last)current++;else{last=c;current=1}best=Math.max(best,current)}return best}
+function classifySequence(seq){
+  const n=seq.length;if(!n)return {primary:"EMPTY",tags:[]};
+  const red=seq.filter(x=>x==="R").length,black=n-red,streak=longestStreak(seq);let changes=0;
+  for(let i=1;i<n;i++)if(seq[i]!==seq[i-1])changes++;
+  const rate=n>1?changes/(n-1):0,tags=[];
+  if(streak>=3)tags.push("STREAK");if(red/n>=.67)tags.push("RED_DOMINANT");if(black/n>=.67)tags.push("BLACK_DOMINANT");if(rate>=.72)tags.push("ALTERNATING");if(Math.abs(red-black)<=1)tags.push("BALANCED");if(!tags.length)tags.push("MIXED");
+  return {primary:tags[0],tags};
+}
+function shapeSignature(seq){const a=normalizeSequence(seq);if(!a.length)return "";const first=a[0],map={};map[first]="A";map[first==="R"?"B":"R"]="B";return a.map(x=>map[x]).join("")}
+function slideWindow(seed,outcomes){
+  let window=normalizeSequence(seed).slice(0,SEED_LENGTH);
+  for(const symbol of normalizeSequence(outcomes))window=[symbol,...window.slice(0,SEED_LENGTH-1)];
+  return window.join("");
+}
+function makeSessionRecord(seq,source="live"){
+  const clean=normalizeSequence(seq).slice(0,SESSION_LENGTH),cls=classifySequence(clean.slice(0,SEED_LENGTH));
+  const seed=clean.slice(0,SEED_LENGTH).join(""),outcome=clean.slice(SEED_LENGTH).join("");
+  return {seq:clean.join(""),seed,outcome,finalWindow:slideWindow(seed,outcome),cat:cls.primary,tags:cls.tags,at:new Date().toISOString(),source,streamId:null,streamIndex:0};
+}
+function normalizeSessionRecord(item,source="saved"){
+  const seq=normalizeSequence(item?.seq??item?.cards??item?.sequence??item?.history??item?.results??item);
+  if(seq.length<SESSION_LENGTH)return null;
+  const rec=makeSessionRecord(seq.slice(0,SESSION_LENGTH),item?.source||source);
+  if(item&&typeof item==="object"){
+    if(typeof item.at==="string")rec.at=item.at;
+    if(typeof item.streamId==="string")rec.streamId=item.streamId;
+    if(Number.isFinite(+item.streamIndex))rec.streamIndex=Math.max(0,+item.streamIndex);
+  }
+  return rec;
+}
+function assignStreams(records,batchPrefix="db",preserve=true){
+  let serial=0,prev=null;
+  for(let i=0;i<records.length;i++){
+    const rec=records[i];
+    rec.finalWindow=slideWindow(rec.seed,rec.outcome);
+    const canContinue=prev&&prev.source===rec.source&&prev.finalWindow===rec.seed;
+    if(preserve&&typeof rec.streamId==="string"&&rec.streamId){
+      rec.streamIndex=Number.isFinite(+rec.streamIndex)?Math.max(0,+rec.streamIndex):(canContinue&&prev.streamId===rec.streamId?prev.streamIndex+1:0);
+    }else if(canContinue){
+      rec.streamId=prev.streamId;rec.streamIndex=prev.streamIndex+1;
+    }else{
+      rec.streamId="stream_"+hashString(batchPrefix+"|"+(serial++)+"|"+i+"|"+rec.seq+"|"+(rec.at||""));rec.streamIndex=0;
+    }
+    prev=rec;
+  }
+  return records;
+}
+function sessionSimilarity(a,b){
+  if(!a||!b)return .5;
+  const ao=normalizeSequence(a.outcome),bo=normalizeSequence(b.outcome),pos=positionalSimilarity(ao,bo).similarity;
+  const shape=shapeSignature(ao)===shapeSignature(bo)?1:0;
+  const at=new Set(a.tags||[]),bt=new Set(b.tags||[]),union=new Set([...at,...bt]);let inter=0;for(const x of at)if(bt.has(x))inter++;
+  const tag=union.size?inter/union.size:.5;
+  return clamp(pos*.68+shape*.20+tag*.12,0,1);
+}
+function streamHistoryBefore(all,index,limit=8){
+  const target=all[index];if(!target?.streamId)return [];
+  const out=[];for(let i=index-1;i>=0&&out.length<limit;i--){const rec=all[i];if(rec.streamId!==target.streamId)break;out.unshift(rec)}return out;
+}
+function currentMacroHistory(all,seed){
+  if(!all.length)return [];
+  const last=all[all.length-1];
+  if(last.source!=="live"||last.finalWindow!==seed.join(""))return [];
+  const out=[];for(let i=all.length-1;i>=0&&out.length<8;i--){const rec=all[i];if(rec.streamId!==last.streamId)break;out.unshift(rec)}return out;
+}
+function compareMacroHistory(currentHistory,candidateHistory){
+  if(!currentHistory.length||!candidateHistory.length)return {score:.5,depth:0,coverage:0};
+  let total=0,weight=0,depth=0;
+  const horizonWeights={1:.36,2:.30,4:.22,8:.12};
+  for(const h of MACRO_HORIZONS){
+    if(currentHistory.length<h||candidateHistory.length<h)continue;
+    let hs=0,hw=0;
+    for(let j=0;j<h;j++){
+      const recency=1+j*.22;
+      const a=currentHistory[currentHistory.length-h+j],b=candidateHistory[candidateHistory.length-h+j];
+      hs+=sessionSimilarity(a,b)*recency;hw+=recency;
+    }
+    const w=horizonWeights[h];total+=(hs/(hw||1))*w;weight+=w;depth=Math.max(depth,h);
+  }
+  return {score:weight?total/weight:.5,depth,coverage:weight};
+}
+function countMacroContexts(records){
+  const groups={};for(const r of records){if(!r.streamId)continue;(groups[r.streamId]||(groups[r.streamId]=[])).push(r)}
+  let count=0;for(const list of Object.values(groups))for(const h of [2,4,8])count+=Math.max(0,list.length-h+1);return count;
+}
+function emptyStat(){return {correct:0,total:0,brier:0,red:0,black:0}}
+function defaultLearning(){return {overall:emptyStat(),modes:{},positions:{},quality:{},contexts:{},shapes:{},experts:{base:emptyStat(),macro:emptyStat()}}}
+function defaultState(){return {version:9,current:[],currentActions:[],pending:null,completedSessions:[],predictions:[],learning:defaultLearning(),lastCompletedUndo:null,meta:{lastBackupAt:null,lastAutoSavedAt:null,imports:[],migratedFrom:null}}}
+function cleanStat(s){return {correct:Number.isFinite(+s?.correct)?Math.max(0,+s.correct):0,total:Number.isFinite(+s?.total)?Math.max(0,+s.total):0,brier:Number.isFinite(+s?.brier)?Math.max(0,+s.brier):0,red:Number.isFinite(+s?.red)?Math.max(0,+s.red):0,black:Number.isFinite(+s?.black)?Math.max(0,+s.black):0}}
+function cleanStatMap(map){const out={};if(!map||typeof map!=="object")return out;for(const [k,v] of Object.entries(map))out[k]=cleanStat(v);return out}
+function sanitizeLearning(l){return {overall:cleanStat(l?.overall),modes:cleanStatMap(l?.modes),positions:cleanStatMap(l?.positions),quality:cleanStatMap(l?.quality),contexts:cleanStatMap(l?.contexts),shapes:cleanStatMap(l?.shapes),experts:{base:cleanStat(l?.experts?.base),macro:cleanStat(l?.experts?.macro)}}}
+function confidenceBand(pRed){const c=Math.max(pRed,1-pRed)*100;return c<52?"50-52":c<55?"52-55":c<60?"55-60":"60+"}
+function normalizePredictionRecord(p){
+  if(!p||typeof p!=="object")return null;
+  const actualSymbol=normalizeSymbol(p.actual),pickRaw=String(p.pick||p.predicted||"").toUpperCase();
+  const pick=pickRaw==="R"||pickRaw==="RED"?"RED":pickRaw==="B"||pickRaw==="BLACK"?"BLACK":null;
+  if(!actualSymbol||!pick)return null;
+  const pRed=Number.isFinite(+p.pRed)?clamp(+p.pRed,.001,.999):(pick==="RED"?.55:.45),context=normalizeSequence(p.context).join(""),position=Number.isFinite(+p.position)?+p.position:context.length+1;
+  return {id:typeof p.id==="string"?p.id:null,at:p.at||new Date().toISOString(),position,context,pick,actual:actualSymbol==="R"?"RED":"BLACK",correct:typeof p.correct==="boolean"?p.correct:(pick===(actualSymbol==="R"?"RED":"BLACK")),pRed,rawPRed:Number.isFinite(+p.rawPRed)?+p.rawPRed:pRed,basePRed:Number.isFinite(+p.basePRed)?clamp(+p.basePRed,.001,.999):null,macroPRed:Number.isFinite(+p.macroPRed)?clamp(+p.macroPRed,.001,.999):null,macroBlend:Number.isFinite(+p.macroBlend)?clamp(+p.macroBlend,0,1):0,macroDepth:Number.isFinite(+p.macroDepth)?Math.max(0,+p.macroDepth):0,macroSupport:Number.isFinite(+p.macroSupport)?Math.max(0,+p.macroSupport):0,macroSimilarity:Number.isFinite(+p.macroSimilarity)?clamp(+p.macroSimilarity,0,1):.5,confidence:Number.isFinite(+p.confidence)?+p.confidence:Math.max(pRed,1-pRed)*100,mode:p.mode||"unknown",support:+p.support||0,meanSimilarity:+p.meanSimilarity||0,qualityKey:p.qualityKey||((p.mode||"unknown")+"|p"+position+"|"+confidenceBand(pRed)),source:p.source||"saved"};
+}
+function getBucket(map,key){if(!map[key])map[key]=emptyStat();return map[key]}
+function updateStat(stat,r){const actualRed=r.actual==="RED";stat.total++;if(r.pick===r.actual)stat.correct++;stat.brier+=(r.pRed-(actualRed?1:0))**2;if(actualRed)stat.red++;else stat.black++}
+function probabilityRecord(pRed,actual){const pick=pRed>=.5?"RED":"BLACK";return {pick,actual,pRed}}
+function learnFromRecord(learning,record){const r=normalizePredictionRecord(record);if(!r)return;updateStat(learning.overall,r);updateStat(getBucket(learning.modes,r.mode),r);updateStat(getBucket(learning.modes,r.mode+"|p"+r.position),r);updateStat(getBucket(learning.positions,String(r.position)),r);updateStat(getBucket(learning.quality,r.qualityKey),r);if(r.context){updateStat(getBucket(learning.contexts,r.position+"|"+r.context),r);updateStat(getBucket(learning.shapes,r.position+"|"+shapeSignature(r.context)),r)}if(r.basePRed!==null)updateStat(learning.experts.base,probabilityRecord(r.basePRed,r.actual));if(r.macroPRed!==null&&r.macroBlend>0)updateStat(learning.experts.macro,probabilityRecord(r.macroPRed,r.actual))}
+function reverseStat(stat,r){if(!stat||stat.total<=0)return;const actualRed=r.actual==="RED";stat.total=Math.max(0,stat.total-1);if(r.pick===r.actual)stat.correct=Math.max(0,stat.correct-1);stat.brier=Math.max(0,stat.brier-(r.pRed-(actualRed?1:0))**2);if(actualRed)stat.red=Math.max(0,stat.red-1);else stat.black=Math.max(0,stat.black-1)}
+function reverseBucket(map,key,r){const st=map?.[key];if(!st)return;reverseStat(st,r);if(st.total<=0)delete map[key]}
+function unlearnFromRecord(learning,record){const r=normalizePredictionRecord(record);if(!r)return;reverseStat(learning.overall,r);reverseBucket(learning.modes,r.mode,r);reverseBucket(learning.modes,r.mode+"|p"+r.position,r);reverseBucket(learning.positions,String(r.position),r);reverseBucket(learning.quality,r.qualityKey,r);if(r.context){reverseBucket(learning.contexts,r.position+"|"+r.context,r);reverseBucket(learning.shapes,r.position+"|"+shapeSignature(r.context),r)}if(r.basePRed!==null)reverseStat(learning.experts.base,probabilityRecord(r.basePRed,r.actual));if(r.macroPRed!==null&&r.macroBlend>0)reverseStat(learning.experts.macro,probabilityRecord(r.macroPRed,r.actual))}
+function rebuildLearning(predictions){const l=defaultLearning();for(const p of predictions||[])learnFromRecord(l,p);return l}
+function makePredictionId(){return "p_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9)}
+function extractPredictionRecords(raw){const root=raw?.state&&typeof raw.state==="object"?raw.state:raw,list=Array.isArray(root?.predictions)?root.predictions:[];return list.map(normalizePredictionRecord).filter(Boolean)}
+function windowsFromSequence(seq,source="import"){
+  const clean=normalizeSequence(seq),out=[];
+  if(clean.length<SESSION_LENGTH)return out;
+  if(clean.length===SESSION_LENGTH){out.push(makeSessionRecord(clean,source));return out}
+  const stride=clean.length===10?1:TRIES_PER_SESSION;
+  for(let i=0;i+SESSION_LENGTH<=clean.length;i+=stride)out.push(makeSessionRecord(clean.slice(i,i+SESSION_LENGTH),source));
+  return out;
+}
+function recordSequenceFromItem(item,out,source){
+  const seq=normalizeSequence(item?.seq??item?.cards??item?.sequence??item?.history??item?.results??item);
+  if(seq.length===SESSION_LENGTH){const rec=normalizeSessionRecord(item,source);if(rec)out.push(rec);return}
+  out.push(...windowsFromSequence(seq,source));
+}
+function extractSessionRecords(raw,source="import"){
+  const root=raw?.state&&typeof raw.state==="object"?raw.state:raw,out=[];
+  for(const list of [root?.completedSessions,root?.sessionDatabase,root?.sessions,root?.sequences]){
+    if(!Array.isArray(list))continue;for(const item of list)recordSequenceFromItem(item,out,source);if(out.length)return out;
+  }
+  for(const key of ["history","outcomes","results","rounds","records","data"]){const seq=normalizeSequence(root?.[key]);if(seq.length>=SESSION_LENGTH){out.push(...windowsFromSequence(seq,source));break}}
+  if(!out.length&&Array.isArray(root)){const nested=root.some(x=>Array.isArray(x)||(x&&typeof x==="object"));if(nested)for(const item of root)recordSequenceFromItem(item,out,source);else out.push(...windowsFromSequence(root,source))}
+  if(!out.length&&typeof root==="string")out.push(...windowsFromSequence(root,source));
+  return out;
+}
+function migrateLegacy(source,key){
+  const out=defaultState(),root=source?.state||source||{};out.completedSessions=assignStreams(extractSessionRecords(source,"legacy").slice(-MAX_DATABASE_SESSIONS),"legacy",false);
+  const cards=normalizeSequence(root.current||root.cards||root.currentSession);out.current=cards.slice(0,Math.min(cards.length,SESSION_LENGTH-1));
+  out.currentActions=out.current.map((_,i)=>({predictionId:null,position:i+1,context:out.current.slice(0,i).join("")}));
+  out.predictions=extractPredictionRecords(source).filter(p=>p.position>=6&&p.position<=8).slice(-5000);out.learning=rebuildLearning(out.predictions);out.meta.migratedFrom=key;return out;
+}
+function sanitizeState(s){
+  const out=defaultState();out.current=normalizeSequence(s?.current).slice(0,SESSION_LENGTH-1);
+  const actions=Array.isArray(s?.currentActions)?s.currentActions:[];out.currentActions=out.current.map((_,i)=>({predictionId:typeof actions[i]?.predictionId==="string"?actions[i].predictionId:null,position:i+1,context:typeof actions[i]?.context==="string"?actions[i].context:out.current.slice(0,i).join("")}));
+  const list=Array.isArray(s?.completedSessions)?s.completedSessions:[];for(const item of list)recordSequenceFromItem(item,out.completedSessions,item?.source||"saved");out.completedSessions=assignStreams(out.completedSessions.slice(-MAX_DATABASE_SESSIONS),"saved",true);
+  out.pending=s?.pending&&typeof s.pending==="object"?{...s.pending}:null;out.predictions=(Array.isArray(s?.predictions)?s.predictions:[]).map(normalizePredictionRecord).filter(Boolean).slice(-5000);out.learning=s?.learning?sanitizeLearning(s.learning):rebuildLearning(out.predictions);if((out.learning.overall?.total||0)===0&&out.predictions.length)out.learning=rebuildLearning(out.predictions);out.meta={...out.meta,...(s?.meta||{})};
+  const snap=s?.lastCompletedUndo;if(snap&&normalizeSequence(snap.current).length===SESSION_LENGTH){const seq=normalizeSequence(snap.current).slice(0,SESSION_LENGTH),a=Array.isArray(snap.currentActions)?snap.currentActions:[];out.lastCompletedUndo={current:seq,currentActions:seq.map((_,i)=>({predictionId:typeof a[i]?.predictionId==="string"?a[i].predictionId:null,position:i+1,context:typeof a[i]?.context==="string"?a[i].context:seq.slice(0,i).join("")})),seq:seq.join(""),at:snap.at||new Date().toISOString()}}
+  return out;
+}
+function loadState(){const own=safeGet(STORAGE_KEY);if(own){try{return sanitizeState(JSON.parse(own))}catch(e){}}for(const key of LEGACY_KEYS){const raw=safeGet(key);if(!raw)continue;try{return migrateLegacy(JSON.parse(raw),key)}catch(e){}}return defaultState()}
+let state=loadState();
+function save(){safeSet(STORAGE_KEY,JSON.stringify(state))}
+save();
+function posteriorAccuracy(stat){return (stat.correct+4)/(stat.total+8)}
+function empiricalRed(stat,prior=6){return (stat.red+prior*.5)/(stat.red+stat.black+prior)}
+function performanceFactor(meta){
+  const stats=[],l=state.learning||defaultLearning(),add=(st,w=1)=>{if(st&&st.total){const evidence=1-Math.exp(-st.total/18),skill=clamp((posteriorAccuracy(st)-.5)/.12,-.35,1.15),factor=1+(skill-1)*evidence;stats.push({factor,weight:w*evidence*Math.sqrt(Math.min(st.total,120))})}};
+  add(l.modes?.[meta.mode],1);add(l.modes?.[meta.mode+"|p"+meta.position],1.25);add(l.positions?.[String(meta.position)],.65);add(l.quality?.[meta.qualityKey],1.1);let sum=1.15,total=1.15;for(const x of stats){sum+=x.factor*x.weight;total+=x.weight}return clamp(sum/total,-.25,1.15);
+}
+function applyFeedbackLearning(rawPRed,meta){
+  const l=state.learning||defaultLearning(),factor=performanceFactor(meta);let p=.5+(rawPRed-.5)*factor,support=0;
+  const exact=l.contexts?.[meta.position+"|"+meta.context];if(exact&&exact.total){const blend=.80*(1-Math.exp(-exact.total/5));p=p*(1-blend)+empiricalRed(exact,4)*blend;support+=exact.total}
+  const shape=l.shapes?.[meta.position+"|"+shapeSignature(meta.context)];if(shape&&shape.total){const blend=.31*(1-Math.exp(-shape.total/18));p=p*(1-blend)+empiricalRed(shape,8)*blend;support+=shape.total}
+  return {pRed:clamp(p,.27,.73),factor,learningSupport:support};
+}
+function expertTrust(stat){
+  const s=stat||emptyStat();if(!s.total)return .82;
+  const evidence=1-Math.exp(-s.total/24),accuracy=(s.correct+3)/(s.total+6),brier=s.brier/Math.max(1,s.total);
+  const skill=clamp(((accuracy-.5)/.13)*.58+((.25-brier)/.09)*.42,-1,1);
+  return clamp(.78+skill*.48*evidence,.28,1.24);
+}
+
+function balancedTieBreak(){const recent=state.predictions.slice(-40);let red=0,black=0;for(const p of recent){if(p.pick==="RED")red++;else if(p.pick==="BLACK")black++}if(red!==black)return red<black?"RED":"BLACK";const seed=state.current.join("")+":"+state.completedSessions.length;return parseInt(hashString(seed).slice(-4),16)%2===0?"RED":"BLACK"}
+function positionalSimilarity(a,b){let hit=0,total=0,same=0;for(let i=0;i<b.length;i++){const w=1+i*.33;total+=w;if(a[i]===b[i]){hit+=w;same++}}return {similarity:total?hit/total:0,same}}
+function buildPrediction(){
+  const current=state.current,n=current.length;if(n<SEED_LENGTH||n>=SESSION_LENGTH)return null;
+  const all=state.completedSessions.filter(s=>typeof s.seq==="string"&&s.seq.length===SESSION_LENGTH),seed=current.slice(0,SEED_LENGTH),observed=current.slice(SEED_LENGTH),macroHistory=currentMacroHistory(all,seed);
+  let mode="none",redWeight=0,blackWeight=0,sumW=0,sumW2=0,support=0,meanSimilarity=0;
+  let macroRed=0,macroBlack=0,macroSum=0,macroSum2=0,macroSupport=0,macroSimilaritySum=0,macroDepth=0;
+  const vote=(next,w,macro)=>{
+    if(next==="R")redWeight+=w;else blackWeight+=w;sumW+=w;sumW2+=w*w;
+    if(macro&&macro.depth>0&&macro.score>=.50){
+      const mw=w*Math.exp((macro.score-.5)*4.2)*(.60+.40*macro.coverage);
+      if(next==="R")macroRed+=mw;else macroBlack+=mw;macroSum+=mw;macroSum2+=mw*mw;macroSupport++;macroSimilaritySum+=macro.score*mw;macroDepth=Math.max(macroDepth,macro.depth);
+    }
+  };
+  if(all.length){
+    const exact=[];for(let i=0;i<all.length;i++){const rec=all[i];if(rec.seq.slice(0,n)===current.join(""))exact.push({rec,index:i})}
+    if(exact.length){
+      mode="exact";
+      for(const c of exact){const next=c.rec.seq[n],recency=.88+.24*((c.index+1)/all.length),w=recency,macro=compareMacroHistory(macroHistory,streamHistoryBefore(all,c.index,8));vote(next,w,macro)}
+      support=exact.length;meanSimilarity=1;
+    }else{
+      const candidates=[];
+      for(let i=0;i<all.length;i++){
+        const rec=all[i],recSeed=rec.seq.slice(0,SEED_LENGTH).split(""),seedSim=positionalSimilarity(recSeed,seed);if(seedSim.same<3)continue;
+        let observedScore=1;if(observed.length){let matches=0;for(let j=0;j<observed.length;j++)if(rec.seq[SEED_LENGTH+j]===observed[j])matches++;observedScore=matches/observed.length}
+        const shapeMatch=shapeSignature(recSeed)===shapeSignature(seed)?1:0,macro=compareMacroHistory(macroHistory,streamHistoryBefore(all,i,8));
+        const macroBonus=macro.depth?clamp((macro.score-.5)*.18,0,.09):0,score=seedSim.similarity*.76+observedScore*.18+shapeMatch*.06+macroBonus;
+        if(score<.56)continue;candidates.push({rec,index:i,score,seedSimilarity:seedSim.similarity,observedScore,macro});
+      }
+      candidates.sort((a,b)=>b.score-a.score||b.index-a.index);const limit=Math.min(180,Math.max(28,Math.round(Math.sqrt(all.length)*8))),selected=candidates.slice(0,limit);mode=observed.length?"pattern-follow":"seed-similar";
+      for(const c of selected){const next=c.rec.seq[n],recency=.86+.28*((c.index+1)/all.length),followBoost=observed.length?(c.observedScore===1?1.55:.58):1,w=Math.exp((c.score-.5)*6.5)*recency*followBoost;vote(next,w,c.macro);meanSimilarity+=c.seedSimilarity*w}
+      support=selected.length;meanSimilarity=sumW?meanSimilarity/sumW:0;
+    }
+  }
+  let basePRed=.5,effective=0;
+  if(sumW){const prior=mode==="exact"?2.1:3.4,posterior=(redWeight+prior)/(redWeight+blackWeight+2*prior);effective=sumW2?(sumW*sumW)/sumW2:0;const reliability=mode==="exact"?.37+.63*(1-Math.exp(-effective/6)):.20+.80*(1-Math.exp(-effective/15))*clamp((meanSimilarity-.48)/.40,0,1);basePRed=clamp(.5+(posterior-.5)*reliability,.28,.72)}
+  let macroPRed=null,macroBlend=0,meanMacroSimilarity=macroSum?macroSimilaritySum/macroSum:.5;
+  if(macroSum&&macroSupport>=2){
+    const prior=3.8,posterior=(macroRed+prior)/(macroRed+macroBlack+2*prior),macroEffective=macroSum2?(macroSum*macroSum)/macroSum2:0;
+    const macroReliability=(1-Math.exp(-macroEffective/10))*clamp((meanMacroSimilarity-.48)/.38,0,1);
+    macroPRed=clamp(.5+(posterior-.5)*macroReliability,.30,.70);
+    const baseTrust=expertTrust(state.learning?.experts?.base),macroTrust=expertTrust(state.learning?.experts?.macro),relative=macroTrust/(macroTrust+baseTrust);
+    macroBlend=clamp(.38*(1-Math.exp(-macroSupport/10))*clamp((meanMacroSimilarity-.50)/.30,0,1)*(0.65+relative*.70),0,.36);
+  }
+  const combinedPRed=macroPRed===null?basePRed:basePRed*(1-macroBlend)+macroPRed*macroBlend;
+  const position=n+1,context=current.join(""),modeLabel=macroBlend>.04?mode+"+macro":mode,qualityKey=modeLabel+"|p"+position+"|"+confidenceBand(combinedPRed),learned=applyFeedbackLearning(combinedPRed,{mode:modeLabel,position,context,qualityKey}),pRed=learned.pRed;
+  let pick;if(pRed>.5005)pick="RED";else if(pRed<.4995)pick="BLACK";else pick=balancedTieBreak();
+  return {pick,pRed,rawPRed:combinedPRed,basePRed,macroPRed,macroBlend,macroDepth,macroSupport,macroSimilarity:meanMacroSimilarity,confidence:Math.max(pRed,1-pRed)*100,mode:modeLabel,support,effective,meanSimilarity,qualityKey,learningFactor:learned.factor,learningSupport:learned.learningSupport,position};
+}
+function generateSignal(){
+  if(state.pending){showPrediction(state.pending,false);return}
+  if(state.current.length<SEED_LENGTH){showToast("Prvo unesi svih 5 početnih boja.","warn");return}
+  if(state.current.length>=SESSION_LENGTH)return;
+  const pred=buildPrediction();if(!pred)return;showPrediction(pred,true);save();render();
+}
+function showPrediction(pred,createPending=true){
+  if(createPending)state.pending={pick:pred.pick,pRed:pred.pRed,rawPRed:pred.rawPRed,basePRed:Number.isFinite(pred.basePRed)?pred.basePRed:null,macroPRed:Number.isFinite(pred.macroPRed)?pred.macroPRed:null,macroBlend:pred.macroBlend||0,macroDepth:pred.macroDepth||0,macroSupport:pred.macroSupport||0,macroSimilarity:Number.isFinite(pred.macroSimilarity)?pred.macroSimilarity:.5,confidence:pred.confidence,position:pred.position||state.current.length+1,context:state.current.join(""),mode:pred.mode||"unknown",support:pred.support||0,effective:pred.effective||0,meanSimilarity:pred.meanSimilarity||0,qualityKey:pred.qualityKey||((pred.mode||"unknown")+"|p"+(state.current.length+1)+"|"+confidenceBand(pred.pRed)),learningFactor:Number.isFinite(pred.learningFactor)?pred.learningFactor:1,learningSupport:pred.learningSupport||0,createdAt:new Date().toISOString()};
+  const view=createPending?state.pending:pred,pick=view.pick,attempt=view.position-SEED_LENGTH;
+  $("resultLabel").textContent="Predikcija • pokušaj "+attempt+"/3";$("card").textContent=pick==="RED"?"♥":"♠";$("card").className="card "+(pick==="RED"?"red":"black");$("signal").textContent=pick;$("signal").className="signal "+(pick==="RED"?"red":"black");$("conf").textContent=(Math.max(view.pRed,1-view.pRed)*100).toFixed(1)+"% confidence";$("result").classList.remove("hidden");
+}
+function hideResult(){$("result").classList.add("hidden")}
+function resolvePending(symbol,source){if(!state.pending)return null;const actual=symbol==="R"?"RED":"BLACK",record={id:makePredictionId(),at:new Date().toISOString(),position:state.pending.position,context:state.pending.context,pick:state.pending.pick,actual,correct:state.pending.pick===actual,pRed:state.pending.pRed,rawPRed:state.pending.rawPRed,basePRed:state.pending.basePRed,macroPRed:state.pending.macroPRed,macroBlend:state.pending.macroBlend,macroDepth:state.pending.macroDepth,macroSupport:state.pending.macroSupport,macroSimilarity:state.pending.macroSimilarity,confidence:state.pending.confidence,mode:state.pending.mode,support:state.pending.support,meanSimilarity:state.pending.meanSimilarity,qualityKey:state.pending.qualityKey,learningFactor:state.pending.learningFactor,learningSupport:state.pending.learningSupport,source};learnFromRecord(state.learning,record);state.predictions.push(record);if(state.predictions.length>5000)state.predictions.shift();state.pending=null;return record}
+function finalizeSessionAndReset(){
+  if(state.current.length!==SESSION_LENGTH)return null;
+  const completed=[...state.current],actions=state.currentActions.map(a=>({...a})),record=makeSessionRecord(completed,"live"),last=state.completedSessions[state.completedSessions.length-1];
+  if(last&&last.source==="live"&&last.finalWindow===record.seed){record.streamId=last.streamId;record.streamIndex=(last.streamIndex||0)+1}else{record.streamId="live_"+hashString(record.at+"|"+record.seq+"|"+state.completedSessions.length);record.streamIndex=0}
+  state.completedSessions.push(record);if(state.completedSessions.length>MAX_DATABASE_SESSIONS)state.completedSessions.shift();state.lastCompletedUndo={current:completed,currentActions:actions,seq:completed.join(""),at:record.at,streamId:record.streamId};state.meta.lastAutoSavedAt=record.at;state.current=[];state.currentActions=[];state.pending=null;hideResult();return record;
+}
+function addCard(c){
+  const symbol=normalizeSymbol(c);if(!symbol)return;
+  if(state.current.length<SEED_LENGTH&&!state.pending){if(state.current.length===0)state.lastCompletedUndo=null;state.current.push(symbol);state.currentActions.push({predictionId:null,position:state.current.length,context:state.current.slice(0,-1).join("")});hideResult();save();render();return}
+  if(!state.pending){showToast("Pritisni GENERATE prije unosa sljedeće stvarne karte.","warn");return}
+  const action={predictionId:null,position:state.current.length+1,context:state.current.join("")},learned=resolvePending(symbol,"direct-card");action.predictionId=learned?.id||null;state.current.push(symbol);state.currentActions.push(action);hideResult();const completed=state.current.length===SESSION_LENGTH?finalizeSessionAndReset():null;save();render();if(completed)showToast("Tri pokušaja su završena. Sesija je automatski sačuvana.","success");else showToast("Stvarni ishod je zapisan. Pritisni GENERATE za sljedeći pokušaj.")
+}
+function mark(correct){if(!state.pending)return;const predicted=state.pending.pick,actual=correct?predicted:(predicted==="RED"?"BLACK":"RED"),symbol=actual==="RED"?"R":"B",action={predictionId:null,position:state.current.length+1,context:state.current.join("")},learned=resolvePending(symbol,"feedback");action.predictionId=learned?.id||null;state.current.push(symbol);state.currentActions.push(action);hideResult();const completed=state.current.length===SESSION_LENGTH?finalizeSessionAndReset():null;save();render();if(completed)showToast("Tri pokušaja su završena. Sesija je automatski sačuvana.","success");else showToast("Rezultat je naučen. Pritisni GENERATE za sljedeći pokušaj.")}
+function findPredictionForUndo(action,position,context){if(action?.predictionId){const idx=state.predictions.findIndex(p=>p.id===action.predictionId);if(idx>=0)return idx}for(let i=state.predictions.length-1;i>=0;i--){const p=state.predictions[i];if(p.position===position&&p.context===context&&(p.source==="feedback"||p.source==="direct-card"))return i}return -1}
+function removePredictionLearning(action,position,context){const idx=findPredictionForUndo(action,position,context);if(idx<0)return false;const [record]=state.predictions.splice(idx,1);unlearnFromRecord(state.learning,record);return true}
+function undoAutoCompleted(){const snap=state.lastCompletedUndo;if(!snap)return false;for(let i=state.completedSessions.length-1;i>=0;i--){if(state.completedSessions[i]?.source==="live"&&state.completedSessions[i].seq===snap.seq){state.completedSessions.splice(i,1);break}}const full=normalizeSequence(snap.current).slice(0,SESSION_LENGTH),actions=Array.isArray(snap.currentActions)?snap.currentActions.map(a=>({...a})):[],last=actions[SESSION_LENGTH-1]||{predictionId:null};removePredictionLearning(last,SESSION_LENGTH,full.slice(0,-1).join(""));state.current=full.slice(0,-1);state.currentActions=actions.slice(0,-1);state.pending=null;state.lastCompletedUndo=null;state.meta.lastAutoSavedAt=null;save();render();showToast("Vraćena je posljednja sesija i uklonjen treći ishod.","warn");return true}
+function undo(){
+  if(!state.current.length){undoAutoCompleted();return}
+  state.pending=null;hideResult();const oldLength=state.current.length,context=state.current.slice(0,-1).join(""),action=state.currentActions.pop()||{predictionId:null};if(oldLength>SEED_LENGTH)removePredictionLearning(action,oldLength,context);state.current.pop();state.meta.lastAutoSavedAt=null;save();render();
+}
+function downloadBackup(){const payload={app:"red-black-triple-session-engine",version:9,exportedAt:new Date().toISOString(),description:"Mini-sesije 5+3 sa povezanim multi-scale kontekstima 2/4/8.",state},blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="red-black-triple-session-v9-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);state.meta.lastBackupAt=new Date().toISOString();save();render()}
+function openImport(){$("importFile").click()}
+function importDatabase(event){
+  const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const text=String(reader.result||""),fingerprint=hashString(text);if((state.meta.imports||[]).some(x=>x.hash===fingerprint)){alert("Ovaj fajl je već ubačen u bazu.");return}let data;try{data=JSON.parse(text)}catch(e){data=text}const records=assignStreams(extractSessionRecords(data,file.name),"import_"+fingerprint,false),feedback=extractPredictionRecords(data).filter(p=>p.position>=6&&p.position<=8);if(!records.length&&!feedback.length){alert("Fajl nema upotrebljive nizove ni potvrđene predikcije.");return}state.completedSessions.push(...records);if(state.completedSessions.length>MAX_DATABASE_SESSIONS)state.completedSessions=state.completedSessions.slice(-MAX_DATABASE_SESSIONS);for(const r of feedback){learnFromRecord(state.learning,r);state.predictions.push(r)}if(state.predictions.length>5000)state.predictions=state.predictions.slice(-5000);state.meta.imports=state.meta.imports||[];state.meta.imports.push({at:new Date().toISOString(),name:file.name,hash:fingerprint,count:records.length,feedback:feedback.length});save();render();alert("Učitano: "+records.length.toLocaleString("sr-RS")+" 3-pokušaj sesija i "+feedback.length.toLocaleString("sr-RS")+" potvrđenih signala.")}catch(e){alert("Import nije uspio: "+e.message)}finally{event.target.value=""}};reader.readAsText(file)
+}
+let toastTimer=null;function showToast(message,type=""){const el=$("toast");clearTimeout(toastTimer);el.textContent=message;el.className="toast "+type;requestAnimationFrame(()=>el.classList.add("show"));toastTimer=setTimeout(()=>el.classList.remove("show"),3100)}
+function render(){
+  const grid=$("grid");
+  grid.innerHTML="";
+
+  // Prvih 5 početnih karata unose se redom slijeva nadesno.
+  // Svaki potvrđeni novi ishod ulazi skroz lijevo, cijeli postojeći niz
+  // pomjera se jedno mjesto udesno, a krajnja desna karta ispada.
+  // Primjer: RRBRB + B => BRRBR.
+  // Baza i engine i dalje čuvaju stvarni hronološki redoslijed.
+  const seed=state.current.slice(0,SEED_LENGTH);
+  const confirmed=state.current.slice(SEED_LENGTH);
+  const shown=confirmed.length
+    ? confirmed.slice().reverse().concat(seed.slice(0,Math.max(0,SEED_LENGTH-confirmed.length))).slice(0,SEED_LENGTH)
+    : seed;
+
+  for(let i=0;i<SEED_LENGTH;i++){
+    const el=document.createElement("div"),v=shown[i];
+    el.className="slot"+(v==="R"?" r":v==="B"?" b":"");
+    const no=document.createElement("small");
+    if(v){
+      // Broj 1 je uvijek trenutno najnovija karta u kliznom prikazu.
+      no.textContent=String(i+1);
+    }else{
+      no.textContent=String(i+1);
+    }
+    el.appendChild(no);
+    el.appendChild(document.createTextNode(v||"–"));
+    grid.appendChild(el);
+  }
+  const completedTries=Math.max(0,state.current.length-SEED_LENGTH),pending=!!state.pending;
+  if(state.current.length<SEED_LENGTH)$("phase").textContent="UNOS "+state.current.length+"/5";else $("phase").textContent="POKUŠAJ "+Math.min(completedTries+1,TRIES_PER_SESSION)+"/3";
+  for(let i=1;i<=TRIES_PER_SESSION;i++){const el=$("try"+i);el.className="attempt"+(i<=completedTries?" done":i===completedTries+1&&state.current.length>=SEED_LENGTH?" active":"")}
+  const allowInput=state.current.length<SEED_LENGTH||pending;$("redInput").disabled=!allowInput;$("blackInput").disabled=!allowInput;
+  const canGenerate=state.current.length>=SEED_LENGTH&&state.current.length<SESSION_LENGTH&&!pending;$("generateBtn").disabled=!canGenerate;$("generateBtn").className="generate"+(canGenerate?" ready":"");
+  if(state.current.length<SEED_LENGTH)$("helper").textContent="Unesi još "+(SEED_LENGTH-state.current.length)+" početn"+(SEED_LENGTH-state.current.length===1?"u boju":"e boje")+".";
+  else if(pending)$("helper").textContent="Signal je spreman — potvrdi stvarnu kartu.";
+  else $("helper").textContent="Pritisni GENERATE za pokušaj "+(completedTries+1)+" od 3.";
+  if(pending)showPrediction(state.pending,false);else hideResult();
+  $("undoBtn").disabled=state.current.length===0&&!state.lastCompletedUndo;
+  $("sessionCount").textContent=state.completedSessions.length.toLocaleString("sr-RS");$("macroCount").textContent=countMacroContexts(state.completedSessions).toLocaleString("sr-RS");$("feedbackCount").textContent=state.predictions.length.toLocaleString("sr-RS");$("databaseCount").textContent=state.completedSessions.length.toLocaleString("sr-RS")+" zapisa";
+  $("backupMeta").textContent=state.meta.lastBackupAt?"Zadnji backup: "+new Date(state.meta.lastBackupAt).toLocaleString("sr-RS"):"Baza se automatski čuva na ovom uređaju. Povremeno napravi BACKUP.";
+}
 render();
 </script>
 </body>
